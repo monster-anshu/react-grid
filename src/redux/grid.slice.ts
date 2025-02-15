@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export const MAX_COL = 10;
-export const MAX_ROW = 10;
-
 const initialState: GridState = {
   cells: {},
   redoStack: [],
@@ -15,7 +12,7 @@ export const gridSlice = createSlice({
   name: "grid",
   initialState,
   reducers: {
-    SELECT_CELL: (state, action: PayloadAction<string | null>) => {
+    ACTIVATE_CELL: (state, action: PayloadAction<string | null>) => {
       state.activeCell = action.payload;
     },
     SET_CONTENT: (
@@ -40,5 +37,5 @@ export const gridSlice = createSlice({
   },
 });
 
-export const { SELECT_CELL, SET_CONTENT } = gridSlice.actions;
-type Actions = ReturnType<typeof SELECT_CELL | typeof SET_CONTENT>;
+export const { ACTIVATE_CELL, SET_CONTENT } = gridSlice.actions;
+type Actions = ReturnType<typeof ACTIVATE_CELL | typeof SET_CONTENT>;

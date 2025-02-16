@@ -148,11 +148,14 @@ export default function Grid({
   return (
     <div className="w-screen h-screen">
       <div
-        className="grid grid-rows-11 min-h-full w-fit overflow-auto border border-gray-200"
+        className="grid grid-rows-11 min-h-full overflow-auto border border-gray-200"
         style={{
           gridTemplateColumns: Array.from({ length: MAX_COL + 1 })
             .map((_, index) => {
-              const width = widths[index] ?? 120;
+              const width = widths[index];
+              if (typeof width !== "number") {
+                return "minmax(100px, 1fr)";
+              }
               return Math.max(width, 50) + "px";
             })
             .join(" "),

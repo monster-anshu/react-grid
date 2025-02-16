@@ -148,9 +148,9 @@ export default function Grid({
   }, [sort]);
 
   return (
-    <div className='h-screen w-screen'>
+    <div className=''>
       <div
-        className='grid min-h-full overflow-auto border border-gray-200'
+        className='relative grid border border-gray-200'
         style={{
           gridTemplateColumns: Array.from({ length: MAX_COL + 1 })
             .map((_, index) => {

@@ -19,7 +19,7 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
     <div
       onClick={onClick}
       ref={resizableRef}
-      className='sticky top-0 flex h-full items-center justify-center gap-2 border-b-2 border-gray-200 bg-gray-100 font-bold'
+      className='sticky top-0 z-10 flex h-full items-center justify-center gap-2 border-b-2 border-gray-200 bg-gray-100 font-bold'
     >
       <div>{children}</div>
       {direction && (

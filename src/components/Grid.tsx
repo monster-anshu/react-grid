@@ -22,6 +22,11 @@ export default function Grid({
   const activeCell = useAppSelector((state) => state.grid.activeCell);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
 
+  const cellsRef = useRef(cells);
+  cellsRef.current = cells;
+  const selectedCellsRef = useRef(selectedCells);
+  selectedCellsRef.current = selectedCells;
+
   const widths = useAppSelector((state) => state.layout.widths);
   const heights = useAppSelector((state) => state.layout.heights);
 
@@ -189,6 +194,39 @@ export default function Grid({
     return false;
   };
 
+  const handleCopy = (event: KeyboardEvent) => {
+    if (!selectedCellsRef.current.length) return;
+
+    event.preventDefault();
+
+    const gridData: string[][] = [];
+    let minRow = Infinity,
+      minCol = Infinity,
+      maxRow = -Infinity,
+      maxCol = -Infinity;
+
+    selectedCellsRef.current.forEach((cellId) => {
+      const [row, col] = getRowCol(cellId);
+      minRow = Math.min(minRow, row);
+      minCol = Math.min(minCol, col);
+      maxRow = Math.max(maxRow, row);
+      maxCol = Math.max(maxCol, col);
+    });
+
+    for (let i = minRow; i <= maxRow; i++) {
+      gridData[i - minRow] = new Array(maxCol - minCol + 1).fill('');
+    }
+
+    selectedCellsRef.current.forEach((cellId) => {
+      const [row, col] = getRowCol(cellId);
+      const value = cellsRef.current[cellId]?.value ?? '';
+      gridData[row - minRow]![col - minCol] = value + '';
+    });
+
+    const clipboardText = gridData.map((row) => row.join('\t')).join('\n');
+    navigator.clipboard.writeText(clipboardText);
+  };
+
   useEffect(() => {
     setrows(([...rows]) => {
       rows.sort((a, b) => {
@@ -228,6 +266,11 @@ export default function Grid({
 
   useEffect(() => {
     const addKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'c') {
+        handleCopy(e);
+        return;
+      }
+
       keyRef.current.add(e.key);
     };
 

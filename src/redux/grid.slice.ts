@@ -15,6 +15,30 @@ export const gridSlice = createSlice({
     ACTIVATE_CELL: (state, action: PayloadAction<string | null>) => {
       state.activeCell = action.payload;
     },
+    SELECT_CELL: (
+      state,
+      action: PayloadAction<{ cellId: string; removeSelection: boolean }>,
+    ) => {
+      if (action.payload.removeSelection) {
+        state.selectedCells = [];
+      }
+      if (state.selectedCells.includes(action.payload.cellId)) {
+        return;
+      }
+      state.selectedCells.push(action.payload.cellId);
+    },
+    REMOVE_SELECTION: (
+      state,
+      { payload }: PayloadAction<{ cellId: string | null }>,
+    ) => {
+      if (payload.cellId === null) {
+        state.selectedCells = [];
+        return;
+      }
+      state.selectedCells = state.selectedCells.filter(
+        (item) => item !== payload.cellId,
+      );
+    },
     SET_CONTENT: (
       state,
       action: PayloadAction<{ cellId: string; content: string | number }>,
@@ -37,5 +61,6 @@ export const gridSlice = createSlice({
   },
 });
 
-export const { ACTIVATE_CELL, SET_CONTENT } = gridSlice.actions;
+export const { ACTIVATE_CELL, SET_CONTENT, SELECT_CELL, REMOVE_SELECTION } =
+  gridSlice.actions;
 type Actions = ReturnType<typeof ACTIVATE_CELL | typeof SET_CONTENT>;

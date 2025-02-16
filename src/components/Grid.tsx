@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
-import { ACTIVATE_CELL, SET_CONTENT } from '~/redux/grid.slice';
+import { ACTIVATE_CELL, SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   HiOutlineSortAscending,
   HiOutlineSortDescending,
@@ -29,6 +29,11 @@ export default function Grid({
   const widths = useAppSelector((state) => state.layout.widths);
   const heights = useAppSelector((state) => state.layout.heights);
 
+  const keyRef = useRef<KeyboardEvent>(null);
+
+  const cellIdRowColRef = useRef<Record<string, `${number}_${number}`>>({});
+  const cellIdRowColReverseRef = useRef<Record<string, string>>({});
+
   const dispatch = useAppDispatch();
   const [sort, setSort] = useState({
     columnId: 0,
@@ -39,7 +44,7 @@ export default function Grid({
     return Array.from({ length: MAX_ROW }, (_, row) => ({
       index: row,
       values: Array.from({ length: MAX_COL }, (_, col) => {
-        const id = `${row}_${col}`;
+        const id = `__${row}_${col}__`;
         return id;
       }),
     }));
@@ -52,50 +57,60 @@ export default function Grid({
 
   const handleKeyPress = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    row: number,
-    col: number,
+    cellId: string,
   ) => {
+    const rowCol = cellIdRowColRef.current[cellId];
+    if (!rowCol) return;
+
+    const [row, col] = rowCol.split('_').map(Number);
+    if (typeof row !== 'number' || typeof col !== 'number') return;
+
     e.key === 'Enter' && dispatch(ACTIVATE_CELL(null));
 
-    if (e.key === 'Tab' && !e.shiftKey) {
-      e.preventDefault();
-      const nextCol = (col + 1) % MAX_COL;
-      const nextRow = (nextCol === 0 ? row + 1 : row) % MAX_ROW;
-      const id = `${nextRow}_${nextCol}`;
-      dispatch(ACTIVATE_CELL(id));
-      return;
+    let nextId;
+
+    switch (e.key) {
+      case 'Enter':
+        dispatch(ACTIVATE_CELL(null));
+        break;
+
+      case 'Tab':
+        if (!e.shiftKey) {
+          e.preventDefault();
+          const nextCol = (col + 1) % MAX_COL;
+          const nextRow = (nextCol === 0 ? row + 1 : row) % MAX_ROW;
+          nextId = `${nextRow}_${nextCol}`;
+        }
+        break;
+
+      case 'ArrowUp':
+        e.preventDefault();
+        const upRow = (row === 0 ? MAX_ROW - 1 : row - 1) % MAX_ROW;
+        nextId = `${upRow}_${col}`;
+        break;
+
+      case 'ArrowDown':
+        e.preventDefault();
+        const downRow = (row + 1) % MAX_ROW;
+        nextId = `${downRow}_${col}`;
+        break;
+
+      case 'ArrowLeft':
+        e.preventDefault();
+        const leftCol = (col === 0 ? MAX_COL - 1 : col - 1) % MAX_COL;
+        nextId = `${row}_${leftCol}`;
+        break;
+
+      case 'ArrowRight':
+        e.preventDefault();
+        const rightCol = (col + 1) % MAX_COL;
+        nextId = `${row}_${rightCol}`;
+        break;
     }
 
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      const nextRow = (row === 0 ? MAX_ROW - 1 : row - 1) % MAX_ROW;
-      const id = `${nextRow}_${col}`;
-      dispatch(ACTIVATE_CELL(id));
-      return;
-    }
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      const nextRow = (row + 1) % MAX_ROW;
-      const id = `${nextRow}_${col}`;
-      dispatch(ACTIVATE_CELL(id));
-      return;
-    }
-
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      const nextCol = (col === 0 ? MAX_COL - 1 : col - 1) % MAX_COL;
-      const id = `${row}_${nextCol}`;
-      dispatch(ACTIVATE_CELL(id));
-      return;
-    }
-
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      const nextCol = (col + 1) % MAX_COL;
-      const id = `${row}_${nextCol}`;
-      dispatch(ACTIVATE_CELL(id));
-      return;
+    if (nextId) {
+      const cellId = cellIdRowColReverseRef.current[nextId] ?? null;
+      dispatch(ACTIVATE_CELL(cellId));
     }
   };
 
@@ -116,6 +131,14 @@ export default function Grid({
       };
 
     setSort(curr);
+  };
+
+  const handleSingleSelect = (cellId: string) => {
+    if (keyRef.current?.key === 'Control') {
+      dispatch(SELECT_CELL({ cellId: cellId, removeSelection: false }));
+      return;
+    }
+    dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
   };
 
   useEffect(() => {
@@ -147,6 +170,29 @@ export default function Grid({
     });
   }, [sort]);
 
+  console.log(cellIdRowColRef.current);
+
+  useEffect(() => {
+    const addKey = (e: KeyboardEvent) => {
+      if (!keyRef.current || keyRef.current.key === e.key) {
+        keyRef.current = e;
+        return;
+      }
+    };
+
+    const removeKey = (e: KeyboardEvent) => {
+      keyRef.current = keyRef.current?.key == e.key ? null : keyRef.current;
+    };
+
+    document.addEventListener('keydown', addKey);
+    document.addEventListener('keyup', removeKey);
+
+    return () => {
+      document.removeEventListener('keydown', addKey);
+      document.removeEventListener('keyup', removeKey);
+    };
+  }, []);
+
   return (
     <div className=''>
       <div
@@ -163,8 +209,8 @@ export default function Grid({
             .join(' '),
           gridTemplateRows: Array.from({ length: MAX_ROW + 1 })
             .map((_, index) => {
-              const height = heights[index] ?? 50;
-              return Math.max(height, 50) + 'px';
+              const height = heights[index] ?? 36;
+              return Math.max(height, 36) + 'px';
             })
             .join(' '),
         }}
@@ -186,6 +232,9 @@ export default function Grid({
               type: 'text',
               value: '',
             };
+            const idForMap = `${row}_${col}` as const;
+            cellIdRowColRef.current[cellId] = idForMap;
+            cellIdRowColReverseRef.current[idForMap] = cellId;
             return (
               <React.Fragment key={cell.id}>
                 {col === 0 && <Row row={row}>{cols.index + 1}</Row>}
@@ -195,9 +244,10 @@ export default function Grid({
                   isSelected={selectedCells.includes(cell.id)}
                   onChange={(value) => handleInputChange(cell.id, value)}
                   value={cell.value}
-                  onKeyPress={(e) => handleKeyPress(e, row, col)}
+                  onKeyPress={(e) => handleKeyPress(e, cellId)}
                   col={col + 1}
                   row={row + 1}
+                  onSelect={handleSingleSelect}
                 />
               </React.Fragment>
             );

@@ -6,7 +6,7 @@ type IGridPageProps = {};
 
 const GridPage: FC<IGridPageProps> = () => {
   return (
-    <Grid columns={10} rows={50} onCellUpdate={() => {}} onSort={() => {}} />
+    <Grid columns={10} rows={10} onCellUpdate={() => {}} onSort={() => {}} />
   );
 };
 

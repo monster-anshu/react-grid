@@ -1,7 +1,12 @@
 import React, { FC, useRef } from 'react';
-import { ACTIVATE_CELL } from '~/redux/grid.slice';
+import {
+  ACTIVATE_CELL,
+  REMOVE_SELECTION,
+  SELECT_CELL,
+} from '~/redux/grid.slice';
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
 import Resizer from './Resizer';
+import { twMerge } from 'tailwind-merge';
 
 type CellProps = {
   id: string;
@@ -10,6 +15,7 @@ type CellProps = {
   isActive: boolean;
   onChange: (value: string | number) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onSelect: (cell: string) => void;
   col: number;
   row: number;
 };
@@ -22,21 +28,26 @@ const Cell: FC<CellProps> = ({
   onKeyPress,
   col,
   row,
+  isSelected,
+  onSelect,
 }) => {
   const dispatch = useAppDispatch();
   const resizableRef = useRef<HTMLDivElement>(null);
 
   const handleCellClick = () => {
+    dispatch(REMOVE_SELECTION({ cellId: null }));
     dispatch(ACTIVATE_CELL(id));
   };
 
   return (
     <div
-      className={`relative border-b-2 border-gray-200 p-1 ${
-        isActive ? 'bg-blue-100' : 'hover:bg-gray-50'
-      }`}
+      className={twMerge(
+        'relative border-b-2 border-gray-200 p-1',
+        isSelected ? 'bg-gray-200' : 'bg-gray-50',
+      )}
       ref={resizableRef}
-      onClick={handleCellClick}
+      onDoubleClick={handleCellClick}
+      onClick={() => onSelect(id)}
     >
       {isActive ? (
         <input

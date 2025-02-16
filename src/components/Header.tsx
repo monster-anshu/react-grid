@@ -57,7 +57,7 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
         </div>
       )}
       <div
-        className="w-1 h-full bg-gray-700 cursor-col-resize absolute top-0 right-0"
+        className="w-0.5 h-full bg-gray-700 cursor-col-resize absolute top-0 right-0"
         onMouseDown={handleMouseDown}
       ></div>
     </div>

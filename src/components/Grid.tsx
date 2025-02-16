@@ -7,6 +7,7 @@ import {
   HiOutlineSortDescending,
 } from "react-icons/hi";
 import Header from "./Header";
+import Row from "./Row";
 
 interface GridProps {
   rows: number; // Number of rows
@@ -26,6 +27,7 @@ export default function Grid({
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
 
   const widths = useAppSelector((state) => state.layout.widths);
+  const heights = useAppSelector((state) => state.layout.heights);
 
   const dispatch = useAppDispatch();
   const [sort, setSort] = useState({
@@ -148,7 +150,7 @@ export default function Grid({
   return (
     <div className="w-screen h-screen">
       <div
-        className="grid grid-rows-11 min-h-full overflow-auto border border-gray-200"
+        className="grid min-h-full overflow-auto border border-gray-200"
         style={{
           gridTemplateColumns: Array.from({ length: MAX_COL + 1 })
             .map((_, index) => {
@@ -157,6 +159,12 @@ export default function Grid({
                 return "minmax(100px, 1fr)";
               }
               return Math.max(width, 50) + "px";
+            })
+            .join(" "),
+          gridTemplateRows: Array.from({ length: MAX_ROW + 1 })
+            .map((_, index) => {
+              const height = heights[index] ?? 50;
+              return Math.max(height, 50) + "px";
             })
             .join(" "),
         }}
@@ -171,8 +179,8 @@ export default function Grid({
             {col}
           </Header>
         ))}
-        {rows.map((values, row) =>
-          values.values.map((cellId, col) => {
+        {rows.map((cols, row) =>
+          cols.values.map((cellId, col) => {
             const cell = cells[cellId] || {
               id: cellId,
               type: "text",
@@ -180,11 +188,7 @@ export default function Grid({
             };
             return (
               <React.Fragment key={cell.id}>
-                {col === 0 && (
-                  <div className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200">
-                    {values.index + 1}
-                  </div>
-                )}
+                {col === 0 && <Row row={row}>{cols.index + 1}</Row>}
                 <Cell
                   id={cell.id}
                   isActive={activeCell === cell.id}

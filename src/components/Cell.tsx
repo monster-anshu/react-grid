@@ -20,7 +20,7 @@ const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
 
   return (
     <div
-      className={`min-h-10 border-r border-b border-gray-200 p-1 ${
+      className={`border-r border-b border-gray-200 p-1 ${
         isActive ? "bg-blue-100" : "hover:bg-gray-50"
       }`}
       onClick={handleCellClick}

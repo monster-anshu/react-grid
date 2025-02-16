@@ -2,10 +2,6 @@ import { useAppDispatch, useAppSelector } from '~/redux/hooks';
 import { ACTIVATE_CELL, SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  HiOutlineSortAscending,
-  HiOutlineSortDescending,
-} from 'react-icons/hi';
 import Header from './Header';
 import Row from './Row';
 
@@ -29,10 +25,21 @@ export default function Grid({
   const widths = useAppSelector((state) => state.layout.widths);
   const heights = useAppSelector((state) => state.layout.heights);
 
-  const keyRef = useRef<KeyboardEvent>(null);
+  const keyRef = useRef(new Set<string>());
 
-  const cellIdRowColRef = useRef<Record<string, `${number}_${number}`>>({});
+  const cellIdRowColRef = useRef<Record<string, string>>({});
   const cellIdRowColReverseRef = useRef<Record<string, string>>({});
+  const getRowCol = (cellId: string) => {
+    const [row, col] =
+      cellIdRowColRef.current[cellId]?.split('_').map(Number) || [];
+    if (typeof row === 'number' && typeof col === 'number') {
+      return [row, col] as const;
+    }
+    return [0, 0] as const;
+  };
+  const getCellId = (rowCol: string) => {
+    return cellIdRowColReverseRef.current[rowCol] || null;
+  };
 
   const dispatch = useAppDispatch();
   const [sort, setSort] = useState({
@@ -59,13 +66,7 @@ export default function Grid({
     e: React.KeyboardEvent<HTMLInputElement>,
     cellId: string,
   ) => {
-    const rowCol = cellIdRowColRef.current[cellId];
-    if (!rowCol) return;
-
-    const [row, col] = rowCol.split('_').map(Number);
-    if (typeof row !== 'number' || typeof col !== 'number') return;
-
-    e.key === 'Enter' && dispatch(ACTIVATE_CELL(null));
+    const [row, col] = getRowCol(cellId);
 
     let nextId;
 
@@ -109,7 +110,7 @@ export default function Grid({
     }
 
     if (nextId) {
-      const cellId = cellIdRowColReverseRef.current[nextId] ?? null;
+      const cellId = getCellId(nextId);
       dispatch(ACTIVATE_CELL(cellId));
     }
   };
@@ -133,12 +134,39 @@ export default function Grid({
     setSort(curr);
   };
 
-  const handleSingleSelect = (cellId: string) => {
-    if (keyRef.current?.key === 'Control') {
+  const handleSingleSelect = (e: React.MouseEvent, cellId: string) => {
+    if (keyRef.current.has('Control') && keyRef.current.has('Shift')) {
+      const lastSelectedCellId = selectedCells.at(-1);
+      if (!lastSelectedCellId) return;
+
+      const [startRow, startCol] = getRowCol(lastSelectedCellId);
+      const [endRow, endCol] = getRowCol(cellId);
+
+      const minRow = Math.min(startRow, endRow);
+      const maxRow = Math.max(startRow, endRow);
+      const minCol = Math.min(startCol, endCol);
+      const maxCol = Math.max(startCol, endCol);
+
+      const idToSelect = [] as string[];
+
+      for (let row = minRow; row <= maxRow; row++) {
+        for (let col = minCol; col <= maxCol; col++) {
+          const nextId = getCellId(`${row}_${col}`) ?? '';
+          idToSelect.push(nextId);
+        }
+      }
+
+      dispatch(SELECT_CELL({ cellId: idToSelect, removeSelection: false }));
+
+      return;
+    }
+
+    if (keyRef.current.has('Control')) {
       dispatch(SELECT_CELL({ cellId: cellId, removeSelection: false }));
       return;
     }
     dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
+    return false;
   };
 
   useEffect(() => {
@@ -178,18 +206,13 @@ export default function Grid({
     });
   }, [sort]);
 
-  console.log(cellIdRowColRef.current);
-
   useEffect(() => {
     const addKey = (e: KeyboardEvent) => {
-      if (!keyRef.current || keyRef.current.key === e.key) {
-        keyRef.current = e;
-        return;
-      }
+      keyRef.current.add(e.key);
     };
 
     const removeKey = (e: KeyboardEvent) => {
-      keyRef.current = keyRef.current?.key == e.key ? null : keyRef.current;
+      keyRef.current.delete(e.key);
     };
 
     document.addEventListener('keydown', addKey);

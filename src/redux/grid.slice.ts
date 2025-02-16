@@ -17,8 +17,15 @@ export const gridSlice = createSlice({
     },
     SELECT_CELL: (
       state,
-      action: PayloadAction<{ cellId: string; removeSelection: boolean }>,
+      action: PayloadAction<{
+        cellId: string | string[];
+        removeSelection: boolean;
+      }>,
     ) => {
+      if (Array.isArray(action.payload.cellId)) {
+        state.selectedCells = action.payload.cellId;
+        return;
+      }
       if (action.payload.removeSelection) {
         state.selectedCells = [];
       }

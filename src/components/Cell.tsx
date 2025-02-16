@@ -15,7 +15,7 @@ type CellProps = {
   isActive: boolean;
   onChange: (value: string | number) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onSelect: (cell: string) => void;
+  onSelect: (e: React.MouseEvent, cell: string) => void;
   col: number;
   row: number;
 };
@@ -43,11 +43,11 @@ const Cell: FC<CellProps> = ({
     <div
       className={twMerge(
         'relative border-b-2 border-gray-200 p-1',
-        isSelected ? 'bg-gray-200' : 'bg-gray-50',
+        isSelected ? 'bg-blue-400' : 'bg-gray-50',
       )}
       ref={resizableRef}
       onDoubleClick={handleCellClick}
-      onClick={() => onSelect(id)}
+      onClick={(e) => onSelect(e, id)}
     >
       {isActive ? (
         <input

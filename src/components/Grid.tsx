@@ -153,8 +153,16 @@ export default function Grid({
         const cellA = cells[a.values[sort.columnId - 1] || ''];
         const cellB = cells[b.values[sort.columnId - 1] || ''];
 
-        const valA = cellA?.value ?? '';
-        const valB = cellB?.value ?? '';
+        let valA = cellA?.value ?? '';
+        let valB = cellB?.value ?? '';
+
+        if (typeof valA === 'string') {
+          valA = valA.toLowerCase();
+        }
+
+        if (typeof valB === 'string') {
+          valB = valB.toLowerCase();
+        }
 
         // Handle empty values
         if (valA === '' && valB !== '') return 1; // Push empty A to end

@@ -24,10 +24,10 @@ export default function Grid({
   const activeCell = useAppSelector((state) => state.grid.activeCell);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
   const dispatch = useAppDispatch();
-  const [sort, setSort] = useState<null | {
-    columnId: number;
-    direction: "asc" | "desc";
-  }>(null);
+  const [sort, setSort] = useState({
+    columnId: 0,
+    direction: "asc",
+  });
 
   const [rows, setrows] = useState(() => {
     return Array.from({ length: MAX_ROW }, (_, row) => ({
@@ -110,14 +110,22 @@ export default function Grid({
       };
 
     setSort(curr);
+  };
 
+  useEffect(() => {
     setrows(([...rows]) => {
       rows.sort((a, b) => {
-        const cellA = cells[a.values[curr.columnId] || ""];
-        const cellB = cells[b.values[curr.columnId] || ""];
+        if (sort.columnId === 0) {
+          if (a.index < b.index) return sort.direction === "asc" ? -1 : 1;
+          if (a.index > b.index) return sort.direction === "asc" ? 1 : -1;
+          return 0;
+        }
 
-        const valA = cellA?.value || "";
-        const valB = cellB?.value || "";
+        const cellA = cells[a.values[sort.columnId - 1] || ""];
+        const cellB = cells[b.values[sort.columnId - 1] || ""];
+
+        const valA = cellA?.value ?? "";
+        const valB = cellB?.value ?? "";
 
         // Handle empty values
         if (valA === "" && valB !== "") return 1; // Push empty A to end
@@ -125,13 +133,13 @@ export default function Grid({
         if (valA === "" && valB === "") return 0; // Both empty = equal
 
         // Handle non-empty values based on sort direction
-        if (valA < valB) return curr.direction === "asc" ? -1 : 1;
-        if (valA > valB) return curr.direction === "asc" ? 1 : -1;
+        if (valA < valB) return sort.direction === "asc" ? -1 : 1;
+        if (valA > valB) return sort.direction === "asc" ? 1 : -1;
         return 0;
       });
       return rows;
     });
-  };
+  }, [sort]);
 
   return (
     <div className="w-screen h-screen">
@@ -140,10 +148,10 @@ export default function Grid({
           <div
             key={`col-${colIndex}`}
             className="min-h-10 bg-gray-100 gap-2 flex items-center justify-center font-bold border-r border-b border-gray-200"
-            onClick={() => handleSort(colIndex - 1)}
+            onClick={() => handleSort(colIndex)}
           >
             <p>{col}</p>
-            {sort?.columnId === colIndex - 1 && (
+            {sort?.columnId === colIndex && (
               <p className="mt-1">
                 {sort.direction === "asc" ? (
                   <HiOutlineSortAscending />
@@ -165,7 +173,7 @@ export default function Grid({
               <React.Fragment key={cell.id}>
                 {col === 0 && (
                   <div className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200">
-                    {row + 1}
+                    {values.index + 1}
                   </div>
                 )}
                 <Cell

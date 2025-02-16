@@ -196,6 +196,8 @@ export default function Grid({
                   onChange={(value) => handleInputChange(cell.id, value)}
                   value={cell.value}
                   onKeyPress={(e) => handleKeyPress(e, row, col)}
+                  col={col + 1}
+                  row={row + 1}
                 />
               </React.Fragment>
             );

@@ -1,6 +1,7 @@
-import React, { FC } from 'react';
+import React, { FC, useRef } from 'react';
 import { ACTIVATE_CELL } from '~/redux/grid.slice';
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
+import Resizer from './Resizer';
 
 type CellProps = {
   id: string;
@@ -9,10 +10,21 @@ type CellProps = {
   isActive: boolean;
   onChange: (value: string | number) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  col: number;
+  row: number;
 };
 
-const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
+const Cell: FC<CellProps> = ({
+  id,
+  isActive,
+  onChange,
+  value,
+  onKeyPress,
+  col,
+  row,
+}) => {
   const dispatch = useAppDispatch();
+  const resizableRef = useRef<HTMLDivElement>(null);
 
   const handleCellClick = () => {
     dispatch(ACTIVATE_CELL(id));
@@ -20,9 +32,10 @@ const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
 
   return (
     <div
-      className={`border-r border-b border-gray-200 p-1 ${
+      className={`relative border-b-2 border-gray-200 p-1 ${
         isActive ? 'bg-blue-100' : 'hover:bg-gray-50'
       }`}
+      ref={resizableRef}
       onClick={handleCellClick}
     >
       {isActive ? (
@@ -42,6 +55,7 @@ const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
       ) : (
         <div className='h-full w-full overflow-hidden'>{value}</div>
       )}
+      <Resizer col={col} resizableRef={resizableRef} />
     </div>
   );
 };

@@ -14,10 +14,12 @@ type CellProps = {
   isSelected: boolean;
   isActive: boolean;
   onChange: (value: string | number) => void;
-  onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onSelect: (e: React.MouseEvent, cell: string) => void;
   col: number;
-  row: number;
+
+  onKeyDown: React.ComponentProps<'input'>['onKeyDown'];
+  onClick?: React.ComponentProps<'div'>['onClick'];
+  onMouseEnter?: React.ComponentProps<'div'>['onMouseEnter'];
+  onMouseDown?: React.ComponentProps<'div'>['onMouseDown'];
 };
 
 const Cell: FC<CellProps> = ({
@@ -25,11 +27,10 @@ const Cell: FC<CellProps> = ({
   isActive,
   onChange,
   value,
-  onKeyPress,
+  onKeyDown,
   col,
-  row,
   isSelected,
-  onSelect,
+  ...props
 }) => {
   const dispatch = useAppDispatch();
   const resizableRef = useRef<HTMLDivElement>(null);
@@ -41,13 +42,13 @@ const Cell: FC<CellProps> = ({
 
   return (
     <div
+      {...props}
       className={twMerge(
         'relative border-b-2 border-gray-200 p-1',
         isSelected ? 'bg-blue-400' : 'bg-gray-50',
       )}
       ref={resizableRef}
       onDoubleClick={handleCellClick}
-      onClick={(e) => onSelect(e, id)}
     >
       {isActive ? (
         <input
@@ -61,7 +62,7 @@ const Cell: FC<CellProps> = ({
           }
           autoFocus
           onBlur={() => dispatch(ACTIVATE_CELL(null))}
-          onKeyDown={onKeyPress}
+          onKeyDown={onKeyDown}
         />
       ) : (
         <div className='h-full w-full overflow-hidden'>{value}</div>

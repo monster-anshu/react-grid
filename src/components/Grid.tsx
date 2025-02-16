@@ -27,6 +27,9 @@ export default function Grid({
 
   const keyRef = useRef(new Set<string>());
 
+  const startCellIdRef = useRef('');
+  const isDraggingRef = useRef(false);
+
   const cellIdRowColRef = useRef<Record<string, string>>({});
   const cellIdRowColReverseRef = useRef<Record<string, string>>({});
   const getRowCol = (cellId: string) => {
@@ -134,30 +137,47 @@ export default function Grid({
     setSort(curr);
   };
 
+  const handleMouseDown = (e: React.MouseEvent, cellId: string) => {
+    e.preventDefault();
+    if (keyRef.current.has('Control')) {
+      return;
+    }
+    startCellIdRef.current = cellId;
+    isDraggingRef.current = true;
+    dispatch(SELECT_CELL({ cellId: [cellId], removeSelection: true }));
+  };
+
+  const handleSelectRange = (startCellIdRef: string, endCellId: string) => {
+    const [startRow, startCol] = getRowCol(startCellIdRef);
+    const [endRow, endCol] = getRowCol(endCellId);
+
+    const minRow = Math.min(startRow, endRow);
+    const maxRow = Math.max(startRow, endRow);
+    const minCol = Math.min(startCol, endCol);
+    const maxCol = Math.max(startCol, endCol);
+
+    const idToSelect = [] as string[];
+
+    for (let row = minRow; row <= maxRow; row++) {
+      for (let col = minCol; col <= maxCol; col++) {
+        const nextId = getCellId(`${row}_${col}`) ?? '';
+        idToSelect.push(nextId);
+      }
+    }
+
+    dispatch(SELECT_CELL({ cellId: idToSelect, removeSelection: false }));
+  };
+
+  const handleMouseEnter = (cellId: string) => {
+    if (!isDraggingRef.current) return;
+    handleSelectRange(startCellIdRef.current, cellId);
+  };
+
   const handleSingleSelect = (e: React.MouseEvent, cellId: string) => {
     if (keyRef.current.has('Control') && keyRef.current.has('Shift')) {
       const lastSelectedCellId = selectedCells.at(-1);
       if (!lastSelectedCellId) return;
-
-      const [startRow, startCol] = getRowCol(lastSelectedCellId);
-      const [endRow, endCol] = getRowCol(cellId);
-
-      const minRow = Math.min(startRow, endRow);
-      const maxRow = Math.max(startRow, endRow);
-      const minCol = Math.min(startCol, endCol);
-      const maxCol = Math.max(startCol, endCol);
-
-      const idToSelect = [] as string[];
-
-      for (let row = minRow; row <= maxRow; row++) {
-        for (let col = minCol; col <= maxCol; col++) {
-          const nextId = getCellId(`${row}_${col}`) ?? '';
-          idToSelect.push(nextId);
-        }
-      }
-
-      dispatch(SELECT_CELL({ cellId: idToSelect, removeSelection: false }));
-
+      handleSelectRange(lastSelectedCellId, cellId);
       return;
     }
 
@@ -215,12 +235,19 @@ export default function Grid({
       keyRef.current.delete(e.key);
     };
 
+    const handleGlobalMouseUp = () => {
+      isDraggingRef.current = false;
+      startCellIdRef.current = '';
+    };
+
     document.addEventListener('keydown', addKey);
     document.addEventListener('keyup', removeKey);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
 
     return () => {
       document.removeEventListener('keydown', addKey);
       document.removeEventListener('keyup', removeKey);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
   }, []);
 
@@ -275,10 +302,11 @@ export default function Grid({
                   isSelected={selectedCells.includes(cell.id)}
                   onChange={(value) => handleInputChange(cell.id, value)}
                   value={cell.value}
-                  onKeyPress={(e) => handleKeyPress(e, cellId)}
+                  onKeyDown={(e) => handleKeyPress(e, cellId)}
                   col={col + 1}
-                  row={row + 1}
-                  onSelect={handleSingleSelect}
+                  onClick={(e) => handleSingleSelect(e, cellId)}
+                  onMouseDown={(e) => handleMouseDown(e, cellId)}
+                  onMouseEnter={() => handleMouseEnter(cellId)}
                 />
               </React.Fragment>
             );

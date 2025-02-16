@@ -24,6 +24,9 @@ export default function Grid({
   const cells = useAppSelector((state) => state.grid.cells);
   const activeCell = useAppSelector((state) => state.grid.activeCell);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
+
+  const widths = useAppSelector((state) => state.layout.widths);
+
   const dispatch = useAppDispatch();
   const [sort, setSort] = useState({
     columnId: 0,
@@ -147,14 +150,19 @@ export default function Grid({
       <div
         className="grid grid-rows-11 min-h-full w-fit overflow-auto border border-gray-200"
         style={{
-          gridTemplateColumns: "repeat(11, auto)",
+          gridTemplateColumns: Array.from({ length: MAX_COL + 1 })
+            .map((_, index) => {
+              const width = widths[index] ?? 120;
+              return Math.max(width, 50) + "px";
+            })
+            .join(" "),
         }}
       >
         {columns.map((col, colIndex) => (
           <Header
             onClick={() => handleSort(colIndex)}
             direction={sort.columnId === colIndex ? sort.direction : null}
-            col={colIndex - 1}
+            col={colIndex}
             key={colIndex}
           >
             {col}
@@ -170,11 +178,7 @@ export default function Grid({
             return (
               <React.Fragment key={cell.id}>
                 {col === 0 && (
-                  <div
-                    className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200"
-                    data-grid-row={row - 1}
-                    data-grid-col={col - 1}
-                  >
+                  <div className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200">
                     {values.index + 1}
                   </div>
                 )}
@@ -185,8 +189,6 @@ export default function Grid({
                   onChange={(value) => handleInputChange(cell.id, value)}
                   value={cell.value}
                   onKeyPress={(e) => handleKeyPress(e, row, col)}
-                  row={row}
-                  col={col}
                 />
               </React.Fragment>
             );

@@ -9,19 +9,9 @@ type CellProps = {
   isActive: boolean;
   onChange: (value: string | number) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  row: number;
-  col: number;
 };
 
-const Cell: FC<CellProps> = ({
-  id,
-  isActive,
-  onChange,
-  value,
-  onKeyPress,
-  col,
-  row,
-}) => {
+const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
   const dispatch = useAppDispatch();
 
   const handleCellClick = () => {
@@ -34,8 +24,6 @@ const Cell: FC<CellProps> = ({
         isActive ? "bg-blue-100" : "hover:bg-gray-50"
       }`}
       onClick={handleCellClick}
-      data-grid-row={row}
-      data-grid-col={col}
     >
       {isActive ? (
         <input

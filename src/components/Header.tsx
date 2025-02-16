@@ -3,6 +3,8 @@ import {
   HiOutlineSortAscending,
   HiOutlineSortDescending,
 } from "react-icons/hi";
+import { useAppDispatch } from "~/redux/hooks";
+import { setWidth } from "~/redux/width.slice";
 
 type HeaderProps = {
   direction: string | null;
@@ -12,9 +14,9 @@ type HeaderProps = {
 };
 
 const Header = ({ direction, children, onClick, col }: HeaderProps) => {
-  const [width, setWidth] = useState<number>(100);
   const resizableRef = useRef<HTMLDivElement>(null);
   const isResizing = useRef(false);
+  const dispatch = useAppDispatch();
 
   const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -29,7 +31,7 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
     const newWidth =
       event.clientX - resizableRef.current.getBoundingClientRect().left;
 
-    setWidth(Math.max(newWidth, 10));
+    dispatch(setWidth({ colIndex: col, width: newWidth }));
   };
 
   const handleMouseUp = (e: MouseEvent) => {
@@ -38,22 +40,11 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
     document.removeEventListener("mouseup", handleMouseUp);
   };
 
-  useEffect(() => {
-    const columns = document.querySelectorAll(`[data-grid-col="${col}"]`);
-    console.log(columns);
-    columns.forEach((column) => {
-      (column as HTMLDivElement).style.width = width + "px";
-    });
-  }, [width]);
-
   return (
     <div
       onClick={onClick}
       ref={resizableRef}
       className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200 relative"
-      style={{
-        width: `clamp(0px, ${width}px, 100%)`,
-      }}
     >
       <div>{children}</div>
       {direction && (

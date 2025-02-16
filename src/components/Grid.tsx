@@ -6,6 +6,7 @@ import {
   HiOutlineSortAscending,
   HiOutlineSortDescending,
 } from "react-icons/hi";
+import Header from "./Header";
 
 interface GridProps {
   rows: number; // Number of rows
@@ -143,24 +144,21 @@ export default function Grid({
 
   return (
     <div className="w-screen h-screen">
-      <div className="grid grid-cols-11 grid-rows-11 min-h-full min-w-full border border-gray-200">
+      <div
+        className="grid grid-rows-11 min-h-full w-fit overflow-auto border border-gray-200"
+        style={{
+          gridTemplateColumns: "repeat(11, auto)",
+        }}
+      >
         {columns.map((col, colIndex) => (
-          <div
-            key={`col-${colIndex}`}
-            className="min-h-10 bg-gray-100 gap-2 flex items-center justify-center font-bold border-r border-b border-gray-200"
+          <Header
             onClick={() => handleSort(colIndex)}
+            direction={sort.columnId === colIndex ? sort.direction : null}
+            col={colIndex - 1}
+            key={colIndex}
           >
-            <p>{col}</p>
-            {sort?.columnId === colIndex && (
-              <p className="mt-1">
-                {sort.direction === "asc" ? (
-                  <HiOutlineSortAscending />
-                ) : (
-                  <HiOutlineSortDescending />
-                )}
-              </p>
-            )}
-          </div>
+            {col}
+          </Header>
         ))}
         {rows.map((values, row) =>
           values.values.map((cellId, col) => {
@@ -172,7 +170,11 @@ export default function Grid({
             return (
               <React.Fragment key={cell.id}>
                 {col === 0 && (
-                  <div className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200">
+                  <div
+                    className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200"
+                    data-grid-row={row - 1}
+                    data-grid-col={col - 1}
+                  >
                     {values.index + 1}
                   </div>
                 )}
@@ -183,6 +185,8 @@ export default function Grid({
                   onChange={(value) => handleInputChange(cell.id, value)}
                   value={cell.value}
                   onKeyPress={(e) => handleKeyPress(e, row, col)}
+                  row={row}
+                  col={col}
                 />
               </React.Fragment>
             );

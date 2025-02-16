@@ -1,10 +1,10 @@
-import React, { useState, useRef, ReactNode, useEffect } from "react";
+import React, { useState, useRef, ReactNode, useEffect } from 'react';
 import {
   HiOutlineSortAscending,
   HiOutlineSortDescending,
-} from "react-icons/hi";
-import { useAppDispatch } from "~/redux/hooks";
-import { setWidth } from "~/redux/width.slice";
+} from 'react-icons/hi';
+import { useAppDispatch } from '~/redux/hooks';
+import { setWidth } from '~/redux/width.slice';
 
 type HeaderProps = {
   direction: string | null;
@@ -19,11 +19,12 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
   const dispatch = useAppDispatch();
 
   const handleMouseDown = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
+    event.preventDefault();
     isResizing.current = true;
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   const handleMouseMove = (event: MouseEvent) => {
@@ -36,20 +37,20 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
 
   const handleMouseUp = (e: MouseEvent) => {
     isResizing.current = false;
-    document.removeEventListener("mousemove", handleMouseMove);
-    document.removeEventListener("mouseup", handleMouseUp);
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
   };
 
   return (
     <div
       onClick={onClick}
       ref={resizableRef}
-      className="min-h-10 h-full bg-gray-100 flex items-center justify-center font-bold border-r border-b border-gray-200 relative"
+      className='sticky top-0 flex h-full items-center justify-center gap-2 border-r border-b border-gray-200 bg-gray-100 font-bold'
     >
       <div>{children}</div>
       {direction && (
-        <div>
-          {direction === "asc" ? (
+        <div className='mt-1'>
+          {direction === 'asc' ? (
             <HiOutlineSortAscending />
           ) : (
             <HiOutlineSortDescending />
@@ -57,7 +58,7 @@ const Header = ({ direction, children, onClick, col }: HeaderProps) => {
         </div>
       )}
       <div
-        className="w-0.5 h-full bg-gray-700 cursor-col-resize absolute top-0 right-0"
+        className='absolute top-0 right-0 h-full w-0.5 cursor-col-resize bg-gray-700'
         onMouseDown={handleMouseDown}
       ></div>
     </div>

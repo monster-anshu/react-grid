@@ -1,6 +1,6 @@
-import { configureStore } from "@reduxjs/toolkit";
-import { gridSlice } from "./grid.slice";
-import { layoutSlice } from "./width.slice";
+import { configureStore } from '@reduxjs/toolkit';
+import { gridSlice } from './grid.slice';
+import { layoutSlice } from './width.slice';
 
 export const store = configureStore({
   reducer: {

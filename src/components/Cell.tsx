@@ -1,6 +1,6 @@
-import React, { FC } from "react";
-import { ACTIVATE_CELL } from "~/redux/grid.slice";
-import { useAppDispatch, useAppSelector } from "~/redux/hooks";
+import React, { FC } from 'react';
+import { ACTIVATE_CELL } from '~/redux/grid.slice';
+import { useAppDispatch, useAppSelector } from '~/redux/hooks';
 
 type CellProps = {
   id: string;
@@ -21,18 +21,18 @@ const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
   return (
     <div
       className={`border-r border-b border-gray-200 p-1 ${
-        isActive ? "bg-blue-100" : "hover:bg-gray-50"
+        isActive ? 'bg-blue-100' : 'hover:bg-gray-50'
       }`}
       onClick={handleCellClick}
     >
       {isActive ? (
         <input
-          type={typeof value === "number" ? "number" : "text"}
-          className="w-full h-full px-1"
+          type={typeof value === 'number' ? 'number' : 'text'}
+          className='h-full w-full px-1'
           value={value}
           onChange={(e) =>
             onChange(
-              typeof value === "number" ? +e.target.value : e.target.value
+              typeof value === 'number' ? +e.target.value : e.target.value,
             )
           }
           autoFocus
@@ -40,7 +40,7 @@ const Cell: FC<CellProps> = ({ id, isActive, onChange, value, onKeyPress }) => {
           onKeyDown={onKeyPress}
         />
       ) : (
-        <div className="w-full h-full overflow-hidden">{value}</div>
+        <div className='h-full w-full overflow-hidden'>{value}</div>
       )}
     </div>
   );

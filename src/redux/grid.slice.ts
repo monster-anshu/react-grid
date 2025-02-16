@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const initialState: GridState = {
   cells: {},
@@ -9,7 +9,7 @@ const initialState: GridState = {
 };
 
 export const gridSlice = createSlice({
-  name: "grid",
+  name: 'grid',
   initialState,
   reducers: {
     ACTIVATE_CELL: (state, action: PayloadAction<string | null>) => {
@@ -17,7 +17,7 @@ export const gridSlice = createSlice({
     },
     SET_CONTENT: (
       state,
-      action: PayloadAction<{ cellId: string; content: string | number }>
+      action: PayloadAction<{ cellId: string; content: string | number }>,
     ) => {
       const cell = state.cells[action.payload.cellId];
       if (!action.payload.content) {
@@ -28,7 +28,7 @@ export const gridSlice = createSlice({
         state.cells[action.payload.cellId] = {
           id: action.payload.cellId,
           value: action.payload.content,
-          type: "text",
+          type: 'text',
         };
         return;
       }

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const initialState = {
   widths: {} as Record<number, number>,
@@ -6,18 +6,18 @@ const initialState = {
 };
 
 export const layoutSlice = createSlice({
-  name: "layout",
+  name: 'layout',
   initialState,
   reducers: {
     setWidth: (
       state,
-      action: PayloadAction<{ colIndex: number; width: number }>
+      action: PayloadAction<{ colIndex: number; width: number }>,
     ) => {
       state.widths[action.payload.colIndex] = action.payload.width;
     },
     setHeight: (
       state,
-      action: PayloadAction<{ rowIndex: number; height: number }>
+      action: PayloadAction<{ rowIndex: number; height: number }>,
     ) => {
       state.heights[action.payload.rowIndex] = action.payload.height;
     },

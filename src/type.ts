@@ -2,7 +2,7 @@
 interface Cell {
   id: string;
   value: string | number; // Actual cell value
-  type: "text" | "number"; // Data type
+  type: 'text' | 'number'; // Data type
 }
 
 // Grid state management
@@ -16,7 +16,7 @@ interface GridState {
 
 // Action for undo/redo
 interface GridAction {
-  type: "UPDATE_CELL" | "SORT_COLUMN" | "MULTI_UPDATE";
+  type: 'UPDATE_CELL' | 'SORT_COLUMN' | 'MULTI_UPDATE';
   payload: {
     cellId?: string;
     value?: string | number;

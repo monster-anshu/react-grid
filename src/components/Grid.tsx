@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
-import { REMOVE_SELECTION, SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
+import { SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
 import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';

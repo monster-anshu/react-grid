@@ -1,10 +1,8 @@
-import React, { FC, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { REDO, UNDO } from '~/redux/grid.slice';
 import { useAppDispatch } from '~/redux/hooks';
 
-type IToolbarProps = {};
-
-const Toolbar: FC<IToolbarProps> = () => {
+const Toolbar: FC = () => {
   const dispatch = useAppDispatch();
 
   const handlerKey = (e: KeyboardEvent) => {

@@ -10,7 +10,6 @@ export type UseGridOptions = {
 export const useGrid = ({ getCellId, getRowCol }: UseGridOptions) => {
   const cells = useAppSelector((state) => state.grid.cells);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
-  const activeCell = useAppSelector((state) => state.grid.activeCell);
 
   const dispatch = useAppDispatch();
 
@@ -18,8 +17,10 @@ export const useGrid = ({ getCellId, getRowCol }: UseGridOptions) => {
   cellsRef.current = cells;
   const selectedCellsRef = useRef(selectedCells);
   selectedCellsRef.current = selectedCells;
-  const activeCellRef = useRef(activeCell);
-  activeCellRef.current = activeCell;
+  const activeCellRef = useRef(
+    selectedCells.length === 1 ? selectedCells[0] : null,
+  );
+  activeCellRef.current = selectedCells.length === 1 ? selectedCells[0] : null;
 
   const populateFromArray = (dataRows: string[][], cellId: string) => {
     const [startRow, startCol] = getRowCol(cellId);

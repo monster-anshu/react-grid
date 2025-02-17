@@ -6,7 +6,7 @@ import {
   SET_CONTENT,
 } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
-import React, { useActionState, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';
 import Row from './Row';
 import Clipboard from './Clipboard';
@@ -124,7 +124,7 @@ export default function Grid({
 
     if (nextId) {
       const cellId = getCellId(nextId);
-      cellId &&
+      if (cellId)
         dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
       dispatch(ACTIVATE_CELL(cellId));
     }

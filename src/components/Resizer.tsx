@@ -1,4 +1,4 @@
-import React, { FC, forwardRef, Ref, RefObject, useRef } from 'react';
+import React, { FC, RefObject, useRef } from 'react';
 import { useAppDispatch } from '~/redux/hooks';
 import { setHeight, setWidth } from '~/redux/width.slice';
 
@@ -45,7 +45,7 @@ const Resizer: FC<IResizerProps> = ({ resizableRef, col, row, isSelected }) => {
     }
   };
 
-  const handleMouseUp = (e: MouseEvent) => {
+  const handleMouseUp = () => {
     isResizing.current = false;
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);

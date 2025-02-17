@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { GridState } from '~/type';
 
 const initialState: GridState = {
   cells: {},
@@ -78,4 +79,5 @@ export const gridSlice = createSlice({
 
 export const { ACTIVATE_CELL, SET_CONTENT, SELECT_CELL, REMOVE_SELECTION } =
   gridSlice.actions;
-type Actions = ReturnType<typeof ACTIVATE_CELL | typeof SET_CONTENT>;
+
+export type Actions = ReturnType<typeof ACTIVATE_CELL | typeof SET_CONTENT>;

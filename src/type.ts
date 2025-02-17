@@ -1,12 +1,12 @@
 // Basic cell structure
-interface Cell {
+export interface Cell {
   id: string;
   value: string | number; // Actual cell value
   type: 'text' | 'number'; // Data type
 }
 
 // Grid state management
-interface GridState {
+export interface GridState {
   cells: Record<string, Cell>; // Map of cell id to cell data
   selectedCells: string[]; // Array of selected cell ids
   activeCell: string | null; // Currently active cell id
@@ -15,7 +15,7 @@ interface GridState {
 }
 
 // Action for undo/redo
-interface GridAction {
+export interface GridAction {
   type: 'UPDATE_CELL' | 'SORT_COLUMN' | 'MULTI_UPDATE';
   payload: {
     cellId?: string;

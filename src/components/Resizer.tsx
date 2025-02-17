@@ -1,10 +1,12 @@
 import React, { FC, RefObject, useRef } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { useAppDispatch } from '~/redux/hooks';
 import { setHeight, setWidth } from '~/redux/width.slice';
 
 type IResizerProps = {
   resizableRef: RefObject<HTMLDivElement | null>;
   isSelected?: boolean;
+  isAISelection?: boolean;
 } & (
   | {
       col: number;
@@ -16,13 +18,20 @@ type IResizerProps = {
     }
 );
 
-const Resizer: FC<IResizerProps> = ({ resizableRef, col, row, isSelected }) => {
+const Resizer: FC<IResizerProps> = ({
+  resizableRef,
+  col,
+  row,
+  isSelected,
+  isAISelection,
+}) => {
   const isResizing = useRef(false);
   const dispatch = useAppDispatch();
 
   const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
+    event.stopPropagation();
     event.preventDefault();
     isResizing.current = true;
     document.addEventListener('mousemove', handleMouseMove);
@@ -54,7 +63,11 @@ const Resizer: FC<IResizerProps> = ({ resizableRef, col, row, isSelected }) => {
   if (typeof row === 'number') {
     return (
       <div
-        className={`absolute bottom-0 left-0 h-[2px] w-full cursor-row-resize ${isSelected ? 'bg-green-700' : 'bg-gray-200'}`}
+        className={twMerge(
+          'absolute bottom-0 left-0 h-[2px] w-full cursor-row-resize',
+          isSelected ? 'bg-green-700' : 'bg-gray-200',
+          isAISelection && isSelected && 'bg-blue-700',
+        )}
         onMouseDown={handleMouseDown}
       ></div>
     );
@@ -62,7 +75,11 @@ const Resizer: FC<IResizerProps> = ({ resizableRef, col, row, isSelected }) => {
 
   return (
     <div
-      className={`absolute right-0 top-0 h-full w-[2px] cursor-col-resize ${isSelected ? 'bg-green-700' : 'bg-gray-200'}`}
+      className={twMerge(
+        'absolute right-0 top-0 h-full w-[2px] cursor-col-resize',
+        isSelected ? 'bg-green-700' : 'bg-gray-200',
+        isAISelection && isSelected && 'bg-blue-700',
+      )}
       onMouseDown={handleMouseDown}
     ></div>
   );

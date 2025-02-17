@@ -25,6 +25,7 @@ export default function Grid({
   onSort,
 }: GridProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isAISelection, setIsAISelection] = useState(false);
   const cells = useAppSelector((state) => state.grid.cells);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
 
@@ -149,6 +150,9 @@ export default function Grid({
     if (keyRef.current.has('Control')) {
       return;
     }
+    const element = e.target as HTMLDivElement;
+    const isAISelection = element.getAttribute('data-ai-selection') === 'true';
+    setIsAISelection(isAISelection);
     startCellIdRef.current = cellId;
     isDraggingRef.current = true;
     dispatch(SELECT_CELL({ cellId: [cellId], removeSelection: true }));
@@ -161,9 +165,15 @@ export default function Grid({
 
   const handleMouseUp = async () => {
     const firstSelected = selectedCells[0];
-    if (!isDraggingRef.current || !firstSelected || selectedCells.length < 2) {
+    if (
+      !isAISelection ||
+      !isDraggingRef.current ||
+      !firstSelected ||
+      selectedCells.length < 2
+    ) {
       return;
     }
+
     const content = convertToArray();
 
     setIsLoading(true);
@@ -298,6 +308,7 @@ export default function Grid({
     const handleGlobalMouseUp = () => {
       isDraggingRef.current = false;
       startCellIdRef.current = '';
+      setIsAISelection(false);
     };
 
     document.addEventListener('keydown', addKey);
@@ -374,6 +385,7 @@ export default function Grid({
               <React.Fragment key={cell.id}>
                 {col === 0 && <Row row={row}>{cols.index + 1}</Row>}
                 <Cell
+                  isAISelection={isAISelection}
                   id={cell.id}
                   isActive={
                     selectedCells.length === 1 && selectedCells[0] === cellId

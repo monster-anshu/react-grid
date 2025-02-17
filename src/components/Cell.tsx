@@ -78,7 +78,7 @@ const Cell: FC<CellProps> = ({
         className={[
           'absolute bottom-0 left-0 right-[2px] top-0 p-1',
           isSelected ? 'outline outline-2' : '',
-          row === 1 && 'mt-[2px]',
+          row === 0 && 'mt-[2px]',
           isAISelection ? 'outline-blue-700' : 'outline-green-700',
         ].join(' ')}
         data-cell-id={id}

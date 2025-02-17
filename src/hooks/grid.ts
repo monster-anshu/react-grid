@@ -21,11 +21,8 @@ export const useGrid = ({ getCellId, getRowCol }: UseGridOptions) => {
   const activeCellRef = useRef(activeCell);
   activeCellRef.current = activeCell;
 
-  const populateFromArray = (dataRows: string[][]) => {
-    const lastSelected = selectedCellsRef.current.at(-1);
-    if (!lastSelected) return;
-
-    const [startRow, startCol] = getRowCol(lastSelected);
+  const populateFromArray = (dataRows: string[][], cellId: string) => {
+    const [startRow, startCol] = getRowCol(cellId);
 
     const updatedCells: UpdateContent[] = [];
     const cellIds: string[] = [];

@@ -28,7 +28,7 @@ const Clipboard: FC<IClipboardProps> = (props) => {
     const clipboardText = event.clipboardData?.getData('text/plain');
     if (!clipboardText) return;
     const dataRows = clipboardText.split('\n').map((row) => row.split('\t'));
-    populateFromArray(dataRows);
+    populateFromArray(dataRows, lastSelected);
   };
 
   useEffect(() => {

@@ -53,7 +53,10 @@ export default function Grid({
     return cellIdRowColReverseRef.current[rowCol] || null;
   };
 
-  const { convertToArray } = useGrid({ getCellId, getRowCol });
+  const { convertToArray, populateFromArray } = useGrid({
+    getCellId,
+    getRowCol,
+  });
 
   const dispatch = useAppDispatch();
   const [sort, setSort] = useState({
@@ -158,11 +161,24 @@ export default function Grid({
     handleSelectRange(startCellIdRef.current, cellId);
   };
 
-  const handleMouseUp = () => {
-    if (!isDraggingRef.current || selectedCells.length < 2) {
+  const handleMouseUp = async () => {
+    const firstSelected = selectedCells[0];
+    if (!isDraggingRef.current || !firstSelected || selectedCells.length < 2) {
       return;
     }
-    console.log(convertToArray());
+    const content = convertToArray();
+    const res = await fetch('/fill', {
+      method: 'POST',
+      body: JSON.stringify({
+        content: content,
+      }),
+    });
+
+    const json: {
+      content: string[][];
+    } = await res.json();
+
+    populateFromArray(json.content, firstSelected);
   };
 
   const handleSelectRange = (startCellIdRef: string, endCellId: string) => {

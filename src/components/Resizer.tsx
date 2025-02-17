@@ -44,7 +44,6 @@ const Resizer: FC<IResizerProps> = ({
       event.clientX - resizableRef.current.getBoundingClientRect().left;
     const newHeight =
       event.clientY - resizableRef.current.getBoundingClientRect().top;
-
     if (typeof col === 'number') {
       dispatch(setWidth({ colIndex: col, width: newWidth }));
     }

@@ -384,15 +384,15 @@ export default function Grid({
       return Math.max(width, 115) + 'px';
     });
     return '80px ' + arr.join(' ');
-  }, [MAX_COL]);
+  }, [MAX_COL, widths]);
 
   const gridTemplateRows = useMemo(() => {
-    const arr = Array.from({ length: MAX_ROW + 1 }).map((_, index) => {
+    const arr = Array.from({ length: MAX_ROW }).map((_, index) => {
       const height = heights[index] ?? 36;
       return Math.max(height, 36) + 'px';
     });
-    return arr.join(' ');
-  }, [MAX_ROW]);
+    return '36px ' + arr.join(' ');
+  }, [MAX_ROW, heights]);
 
   return (
     <div className=''>
@@ -414,7 +414,7 @@ export default function Grid({
           <Header
             onClick={() => handleSort(colIndex)}
             direction={sort.columnId === colIndex ? sort.direction : null}
-            col={colIndex}
+            col={colIndex - 1}
             key={colIndex}
           >
             {col}
@@ -443,8 +443,8 @@ export default function Grid({
                   type={cell.type}
                   isSelected={selectedCells.includes(cell.id)}
                   value={cell.value}
-                  col={col + 1}
-                  row={row + 1}
+                  col={col}
+                  row={row}
                   onMouseDown={(e) => handleMouseDown(e, cellId)}
                   onMouseEnter={() => handleMouseEnter(cellId)}
                   onMouseUp={() => handleMouseUp()}

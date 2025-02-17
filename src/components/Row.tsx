@@ -15,7 +15,7 @@ const Row: FC<RowProps> = ({ row, children }) => {
       className='relative flex h-full items-center justify-center border-r-2 border-gray-200 bg-gray-100 font-bold'
     >
       {children}
-      <Resizer resizableRef={resizableRef} row={row + 1} />
+      <Resizer resizableRef={resizableRef} row={row} />
     </div>
   );
 };

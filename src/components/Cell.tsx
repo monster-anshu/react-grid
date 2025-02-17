@@ -1,10 +1,8 @@
-import React, { FC, FormEvent, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
 import Resizer from './Resizer';
 import { twJoin, twMerge } from 'tailwind-merge';
 import { PiMagicWandThin } from 'react-icons/pi';
 import { NUMBER_ONLY } from '~/utils/regex';
-import { MdNumbers } from 'react-icons/md';
-import { GoDot } from 'react-icons/go';
 
 type CellProps = {
   id: string;
@@ -59,6 +57,8 @@ const Cell: FC<CellProps> = ({
 
     if (isActive) {
       element.focus();
+    } else {
+      element.blur();
     }
 
     return () => {};

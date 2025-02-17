@@ -44,30 +44,37 @@ const Cell: FC<CellProps> = ({
     <div
       {...props}
       className={twMerge(
-        'relative border-b-2 border-gray-200 p-1',
-        isSelected ? 'bg-blue-400' : 'bg-gray-50',
+        'relative overflow-visible border-b-2 border-gray-200',
+        isSelected ? '' : 'bg-gray-50',
       )}
       ref={resizableRef}
       onDoubleClick={handleCellClick}
     >
-      {isActive ? (
-        <input
-          type={typeof value === 'number' ? 'number' : 'text'}
-          className='h-full w-full px-1'
-          value={value}
-          onChange={(e) =>
-            onChange(
-              typeof value === 'number' ? +e.target.value : e.target.value,
-            )
-          }
-          autoFocus
-          onBlur={() => dispatch(ACTIVATE_CELL(null))}
-          onKeyDown={onKeyDown}
-        />
-      ) : (
-        <div className='h-full w-full overflow-hidden'>{value}</div>
-      )}
-      <Resizer col={col} resizableRef={resizableRef} />
+      <div
+        className={twMerge(
+          'absolute top-0 right-[2px] bottom-0 left-0 p-1 outline-green-700',
+          isSelected ? 'z-20 outline-2' : '',
+        )}
+      >
+        {isActive ? (
+          <input
+            type={typeof value === 'number' ? 'number' : 'text'}
+            className='h-full w-full px-1'
+            value={value}
+            onChange={(e) =>
+              onChange(
+                typeof value === 'number' ? +e.target.value : e.target.value,
+              )
+            }
+            autoFocus
+            onBlur={() => dispatch(ACTIVATE_CELL(null))}
+            onKeyDown={onKeyDown}
+          />
+        ) : (
+          <div className='h-full w-full overflow-hidden'>{value}</div>
+        )}
+      </div>
+      <Resizer col={col} resizableRef={resizableRef} isSelected={isSelected} />
     </div>
   );
 };

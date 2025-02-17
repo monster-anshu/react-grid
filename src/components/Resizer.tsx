@@ -4,6 +4,7 @@ import { setHeight, setWidth } from '~/redux/width.slice';
 
 type IResizerProps = {
   resizableRef: RefObject<HTMLDivElement | null>;
+  isSelected?: boolean;
 } & (
   | {
       col: number;
@@ -15,7 +16,7 @@ type IResizerProps = {
     }
 );
 
-const Resizer: FC<IResizerProps> = ({ resizableRef, col, row }) => {
+const Resizer: FC<IResizerProps> = ({ resizableRef, col, row, isSelected }) => {
   const isResizing = useRef(false);
   const dispatch = useAppDispatch();
 
@@ -53,7 +54,7 @@ const Resizer: FC<IResizerProps> = ({ resizableRef, col, row }) => {
   if (typeof row === 'number') {
     return (
       <div
-        className='absolute bottom-0 left-0 h-[2px] w-full cursor-row-resize bg-gray-200'
+        className={`absolute bottom-0 left-0 h-[2px] w-full cursor-row-resize ${isSelected ? 'bg-green-700' : 'bg-gray-200'}`}
         onMouseDown={handleMouseDown}
       ></div>
     );
@@ -61,7 +62,7 @@ const Resizer: FC<IResizerProps> = ({ resizableRef, col, row }) => {
 
   return (
     <div
-      className='absolute top-0 right-0 h-full w-[2px] cursor-col-resize bg-gray-200'
+      className={`absolute top-0 right-0 h-full w-[2px] cursor-col-resize ${isSelected ? 'bg-green-700' : 'bg-gray-200'}`}
       onMouseDown={handleMouseDown}
     ></div>
   );

@@ -4,6 +4,7 @@ import Cell from '~/components/Cell';
 import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';
 import Row from './Row';
+import Clipboard from './Clipboard';
 
 interface GridProps {
   rows: number; // Number of rows
@@ -37,6 +38,7 @@ export default function Grid({
 
   const cellIdRowColRef = useRef<Record<string, string>>({});
   const cellIdRowColReverseRef = useRef<Record<string, string>>({});
+
   const getRowCol = (cellId: string) => {
     const [row, col] =
       cellIdRowColRef.current[cellId]?.split('_').map(Number) || [];
@@ -45,6 +47,7 @@ export default function Grid({
     }
     return [0, 0] as const;
   };
+
   const getCellId = (rowCol: string) => {
     return cellIdRowColReverseRef.current[rowCol] || null;
   };
@@ -194,39 +197,6 @@ export default function Grid({
     return false;
   };
 
-  const handleCopy = (event: KeyboardEvent) => {
-    if (!selectedCellsRef.current.length) return;
-
-    event.preventDefault();
-
-    const gridData: string[][] = [];
-    let minRow = Infinity,
-      minCol = Infinity,
-      maxRow = -Infinity,
-      maxCol = -Infinity;
-
-    selectedCellsRef.current.forEach((cellId) => {
-      const [row, col] = getRowCol(cellId);
-      minRow = Math.min(minRow, row);
-      minCol = Math.min(minCol, col);
-      maxRow = Math.max(maxRow, row);
-      maxCol = Math.max(maxCol, col);
-    });
-
-    for (let i = minRow; i <= maxRow; i++) {
-      gridData[i - minRow] = new Array(maxCol - minCol + 1).fill('');
-    }
-
-    selectedCellsRef.current.forEach((cellId) => {
-      const [row, col] = getRowCol(cellId);
-      const value = cellsRef.current[cellId]?.value ?? '';
-      gridData[row - minRow]![col - minCol] = value + '';
-    });
-
-    const clipboardText = gridData.map((row) => row.join('\t')).join('\n');
-    navigator.clipboard.writeText(clipboardText);
-  };
-
   useEffect(() => {
     setrows(([...rows]) => {
       rows.sort((a, b) => {
@@ -266,11 +236,6 @@ export default function Grid({
 
   useEffect(() => {
     const addKey = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'c') {
-        handleCopy(e);
-        return;
-      }
-
       keyRef.current.add(e.key);
     };
 
@@ -326,6 +291,7 @@ export default function Grid({
             {col}
           </Header>
         ))}
+        <Clipboard getRowCol={getRowCol} getCellId={getCellId} />
         {rows.map((cols, row) =>
           cols.values.map((cellId, col) => {
             const cell = cells[cellId] || {

@@ -8,6 +8,8 @@ const initialState: GridState = {
   activeCell: null,
 };
 
+export type UpdateContent = { cellId: string; content: string | number };
+
 export const gridSlice = createSlice({
   name: 'grid',
   initialState,
@@ -48,22 +50,28 @@ export const gridSlice = createSlice({
     },
     SET_CONTENT: (
       state,
-      action: PayloadAction<{ cellId: string; content: string | number }>,
+      action: PayloadAction<UpdateContent | UpdateContent[]>,
     ) => {
-      const cell = state.cells[action.payload.cellId];
-      if (!action.payload.content) {
-        delete state.cells[action.payload.cellId];
-        return;
-      }
-      if (!cell) {
-        state.cells[action.payload.cellId] = {
-          id: action.payload.cellId,
-          value: action.payload.content,
-          type: 'text',
-        };
-        return;
-      }
-      cell.value = action.payload.content;
+      const payload = Array.isArray(action.payload)
+        ? action.payload
+        : [action.payload];
+
+      payload.forEach(({ cellId, content }) => {
+        const cell = state.cells[cellId];
+        if (!content) {
+          delete state.cells[cellId];
+          return;
+        }
+        if (!cell) {
+          state.cells[cellId] = {
+            id: cellId,
+            value: content,
+            type: 'text',
+          };
+          return;
+        }
+        cell.value = content;
+      });
     },
   },
 });

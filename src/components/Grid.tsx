@@ -160,6 +160,13 @@ export default function Grid({
     handleSelectRange(startCellIdRef.current, cellId);
   };
 
+  const handleMouseUp = () => {
+    if (!isDraggingRef.current || selectedCells.length < 2) {
+      return;
+    }
+    console.log(selectedCells);
+  };
+
   const handleSelectRange = (startCellIdRef: string, endCellId: string) => {
     const [startRow, startCol] = getRowCol(startCellIdRef);
     const [endRow, endCol] = getRowCol(endCellId);
@@ -357,6 +364,7 @@ export default function Grid({
                   col={col + 1}
                   onMouseDown={(e) => handleMouseDown(e, cellId)}
                   onMouseEnter={() => handleMouseEnter(cellId)}
+                  onMouseUp={() => handleMouseUp()}
                 />
               </React.Fragment>
             );

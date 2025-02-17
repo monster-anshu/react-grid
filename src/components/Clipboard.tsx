@@ -1,50 +1,21 @@
-import React, { FC, useEffect, useRef } from 'react';
-import { SELECT_CELL, SET_CONTENT, UpdateContent } from '~/redux/grid.slice';
-import { useAppDispatch, useAppSelector } from '~/redux/hooks';
+import { FC, useEffect } from 'react';
+import { useGrid, UseGridOptions } from '~/hooks/grid';
 
 type IClipboardProps = {
   getRowCol: (cellId: string) => readonly [number, number];
   getCellId: (rowCol: string) => string | null;
 };
 
-const Clipboard: FC<IClipboardProps> = ({ getRowCol, getCellId }) => {
-  const cells = useAppSelector((state) => state.grid.cells);
-  const selectedCells = useAppSelector((state) => state.grid.selectedCells);
-  const dispatch = useAppDispatch();
-
-  const cellsRef = useRef(cells);
-  cellsRef.current = cells;
-  const selectedCellsRef = useRef(selectedCells);
-  selectedCellsRef.current = selectedCells;
+const Clipboard: FC<IClipboardProps> = (props) => {
+  const { convertToArray, populateFromArray, selectedCellsRef, activeCellRef } =
+    useGrid(props);
 
   const handleCopy = (event: ClipboardEvent) => {
     if (!selectedCellsRef.current.length) return;
 
     event.preventDefault();
 
-    const gridData: string[][] = [];
-    let minRow = Infinity,
-      minCol = Infinity,
-      maxRow = -Infinity,
-      maxCol = -Infinity;
-
-    selectedCellsRef.current.forEach((cellId) => {
-      const [row, col] = getRowCol(cellId);
-      minRow = Math.min(minRow, row);
-      minCol = Math.min(minCol, col);
-      maxRow = Math.max(maxRow, row);
-      maxCol = Math.max(maxCol, col);
-    });
-
-    for (let i = minRow; i <= maxRow; i++) {
-      gridData[i - minRow] = new Array(maxCol - minCol + 1).fill('');
-    }
-
-    selectedCellsRef.current.forEach((cellId) => {
-      const [row, col] = getRowCol(cellId);
-      const value = cellsRef.current[cellId]?.value ?? '';
-      gridData[row - minRow]![col - minCol] = value + '';
-    });
+    const gridData = convertToArray();
 
     const clipboardText = gridData.map((row) => row.join('\t')).join('\n');
     event.clipboardData?.setData('text/plain', clipboardText);
@@ -52,32 +23,12 @@ const Clipboard: FC<IClipboardProps> = ({ getRowCol, getCellId }) => {
 
   const handlePaste = (event: ClipboardEvent) => {
     const lastSelected = selectedCellsRef.current.at(-1);
-    if (!lastSelected) return;
-
+    if (!lastSelected || activeCellRef.current) return;
     event.preventDefault();
     const clipboardText = event.clipboardData?.getData('text/plain');
     if (!clipboardText) return;
-
     const dataRows = clipboardText.split('\n').map((row) => row.split('\t'));
-    const [startRow, startCol] = getRowCol(lastSelected);
-
-    const updatedCells: UpdateContent[] = [];
-    const cellIds: string[] = [];
-
-    dataRows.forEach((row, rowIndex) => {
-      row.forEach((value, colIndex) => {
-        const targetCellId = getCellId(
-          `${startRow + rowIndex}_${startCol + colIndex}`,
-        );
-        if (targetCellId) {
-          cellIds.push(targetCellId);
-          updatedCells.push({ cellId: targetCellId, content: value });
-        }
-      });
-    });
-
-    dispatch(SET_CONTENT(updatedCells));
-    dispatch(SELECT_CELL({ cellId: cellIds, removeSelection: true }));
+    populateFromArray(dataRows);
   };
 
   useEffect(() => {

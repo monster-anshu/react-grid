@@ -12,6 +12,7 @@ type CellProps = {
 
   onMouseEnter?: React.ComponentProps<'div'>['onMouseEnter'];
   onMouseDown?: React.ComponentProps<'div'>['onMouseDown'];
+  onMouseUp?: React.ComponentProps<'div'>['onMouseUp'];
 };
 
 const Cell: FC<CellProps> = ({

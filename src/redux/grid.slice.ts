@@ -83,11 +83,12 @@ export const gridSlice = createSlice({
           state.cells[cellId] = {
             id: cellId,
             value: content,
-            type: 'text',
+            type: typeof content === 'number' ? 'number' : 'text',
           };
           return;
         }
         cell.value = content;
+        cell.type = typeof content === 'number' ? 'number' : 'text';
       });
     },
     UNDO: (state) => {

@@ -10,6 +10,7 @@ import { autoFill } from '~/actions/auto-fill';
 import { createPortal } from 'react-dom';
 import { CgSpinner } from 'react-icons/cg';
 import Toolbar from './Toolbar';
+import { NUMBER_ONLY } from '~/utils/regex';
 
 interface GridProps {
   rows: number; // Number of rows
@@ -226,16 +227,38 @@ export default function Grid({
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
     e.stopPropagation();
+
+    const cellType = cells[cellId]?.type || 'text';
+
     const value = target.value;
-    dispatch(SET_CONTENT({ cellId: cellId, content: value }));
-    onCellUpdate(cellId, value);
+
+    if (value !== '' && cellType === 'number' && !NUMBER_ONLY.test(value)) {
+      return;
+    }
+
+    const finalValue = cellType === 'number' ? +value : value;
+    dispatch(
+      SET_CONTENT({
+        cellId: cellId,
+        content: finalValue,
+      }),
+    );
+    onCellUpdate(cellId, finalValue);
   };
 
   const handleBlur = (e: React.FormEvent) => {
     const target = e.target as HTMLInputElement;
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
-    // dispatch(REMOVE_SELECTION({ cellId }));
+    const value = target.value || '';
+    if (value === '') {
+      dispatch(SET_CONTENT({ cellId: cellId, content: '' }));
+      return;
+    }
+    if (NUMBER_ONLY.test(value)) {
+      dispatch(SET_CONTENT({ cellId: cellId, content: +value }));
+      return;
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -390,6 +413,7 @@ export default function Grid({
                   isActive={
                     selectedCells.length === 1 && selectedCells[0] === cellId
                   }
+                  type={cell.type}
                   isSelected={selectedCells.includes(cell.id)}
                   value={cell.value}
                   col={col + 1}

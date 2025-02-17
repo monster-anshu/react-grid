@@ -1,11 +1,13 @@
-import React, { FC, useRef } from 'react';
+import React, { FC, FormEvent, useEffect, useRef } from 'react';
 import Resizer from './Resizer';
 import { twMerge } from 'tailwind-merge';
 import { PiMagicWandThin } from 'react-icons/pi';
+import { NUMBER_ONLY } from '~/utils/regex';
 
 type CellProps = {
   id: string;
   value: string | number;
+  type: 'text' | 'number';
   isSelected: boolean;
   isActive: boolean;
   onChange?: (value: string | number) => void;
@@ -26,9 +28,39 @@ const Cell: FC<CellProps> = ({
   isSelected,
   row,
   isAISelection,
+  type,
   ...props
 }) => {
   const resizableRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLInputElement>(null);
+
+  const handleChange = onChange
+    ? (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+
+        if (value === '') {
+          onChange('');
+          return;
+        }
+
+        if (type === 'number' && !NUMBER_ONLY.test(value)) {
+          return;
+        }
+
+        onChange(type === 'number' ? +value : value);
+      }
+    : () => null;
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    if (isActive) {
+      element.focus();
+    }
+
+    return () => {};
+  }, [isActive]);
 
   return (
     <div
@@ -49,20 +81,14 @@ const Cell: FC<CellProps> = ({
         ].join(' ')}
         data-cell-id={id}
       >
-        {isActive ? (
-          <input
-            type={typeof value === 'number' ? 'number' : 'text'}
-            className='h-full w-full px-1 focus:outline-none'
-            value={value}
-            data-cell-id={id}
-            autoFocus
-            onChange={(e) => onChange?.(e.target.value)}
-          />
-        ) : (
-          <div className='h-full w-full overflow-hidden' data-cell-id={id}>
-            {value}
-          </div>
-        )}
+        <input
+          type={typeof value === 'number' ? 'number' : 'text'}
+          className='h-full w-full px-1 focus:outline-none'
+          value={value}
+          data-cell-id={id}
+          onChange={handleChange}
+          ref={ref}
+        />
       </div>
       <Resizer
         col={col}

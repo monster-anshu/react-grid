@@ -155,6 +155,11 @@ export default function Grid({
     dispatch(SELECT_CELL({ cellId: [cellId], removeSelection: true }));
   };
 
+  const handleMouseEnter = (cellId: string) => {
+    if (!isDraggingRef.current) return;
+    handleSelectRange(startCellIdRef.current, cellId);
+  };
+
   const handleSelectRange = (startCellIdRef: string, endCellId: string) => {
     const [startRow, startCol] = getRowCol(startCellIdRef);
     const [endRow, endCol] = getRowCol(endCellId);
@@ -174,11 +179,6 @@ export default function Grid({
     }
 
     dispatch(SELECT_CELL({ cellId: idToSelect, removeSelection: false }));
-  };
-
-  const handleMouseEnter = (cellId: string) => {
-    if (!isDraggingRef.current) return;
-    handleSelectRange(startCellIdRef.current, cellId);
   };
 
   const handleSingleSelect = (e: React.MouseEvent, cellId: string) => {
@@ -231,7 +231,6 @@ export default function Grid({
   const handleDoubleClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLDivElement;
     const cellId = target.getAttribute?.('data-cell-id');
-    console.log(cellId);
     if (!cellId) return;
     dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
     dispatch(ACTIVATE_CELL(cellId));

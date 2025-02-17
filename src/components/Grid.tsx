@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
-import { SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
+import { SELECT_CELL, SET_ACTIVE, SET_CONTENT } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Header from './Header';
 import Row from './Row';
 import Clipboard from './Clipboard';
@@ -13,8 +13,8 @@ import Toolbar from './Toolbar';
 import { NUMBER_ONLY } from '~/utils/regex';
 
 interface GridProps {
-  rows: number; // Number of rows
-  columns: number; // Number of columns
+  rows: number;
+  columns: number;
   onCellUpdate: (cellId: string, value: string | number) => void;
   onSort: (columnId: string, direction: 'asc' | 'desc') => void;
 }
@@ -27,6 +27,7 @@ export default function Grid({
 }: GridProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isAISelection, setIsAISelection] = useState(false);
+
   const cells = useAppSelector((state) => state.grid.cells);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
 
@@ -54,7 +55,13 @@ export default function Grid({
     return cellIdRowColReverseRef.current[rowCol] || null;
   };
 
-  const { convertToArray, populateFromArray } = useGrid({
+  const {
+    convertToArray,
+    populateFromArray,
+    selectedCellsRef,
+    activeCell,
+    activeCellRef,
+  } = useGrid({
     getCellId,
     getRowCol,
   });
@@ -75,14 +82,18 @@ export default function Grid({
     }));
   });
 
-  const handleKeyPress = (e: React.KeyboardEvent, cellId: string) => {
+  const handleKeyPress = (
+    e: KeyboardEvent,
+    cellId: string,
+    activateNext = false,
+  ) => {
     const [row, col] = getRowCol(cellId);
 
     let nextId;
 
     switch (e.key) {
       case 'Enter':
-        dispatch(SELECT_CELL({ cellId: [], removeSelection: true }));
+        dispatch(SET_ACTIVE(null));
         break;
 
       case 'Tab':
@@ -119,10 +130,13 @@ export default function Grid({
         break;
     }
 
-    if (nextId) {
-      const cellId = getCellId(nextId);
-      if (cellId)
-        dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
+    const nextCellId = getCellId(nextId || '');
+    if (!nextCellId) {
+      return;
+    }
+    dispatch(SELECT_CELL({ cellId: nextCellId, removeSelection: true }));
+    if (activateNext) {
+      dispatch(SET_ACTIVE(nextCellId));
     }
   };
 
@@ -161,6 +175,7 @@ export default function Grid({
 
   const handleMouseEnter = (cellId: string) => {
     if (!isDraggingRef.current) return;
+    dispatch(SET_ACTIVE(null));
     handleSelectRange(startCellIdRef.current, cellId);
   };
 
@@ -208,6 +223,8 @@ export default function Grid({
   };
 
   const handleSingleSelect = (e: React.MouseEvent, cellId: string) => {
+    dispatch(SET_ACTIVE(null));
+
     if (keyRef.current.has('Control') && keyRef.current.has('Shift')) {
       const lastSelectedCellId = selectedCells.at(-1);
       if (!lastSelectedCellId) return;
@@ -265,7 +282,7 @@ export default function Grid({
     const target = e.target as HTMLInputElement;
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
-    handleKeyPress(e, cellId);
+    handleKeyPress(e.nativeEvent, cellId, true);
   };
 
   const handleSingleClick = (e: React.MouseEvent) => {
@@ -279,7 +296,7 @@ export default function Grid({
     const target = e.target as HTMLDivElement;
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
-    dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
+    dispatch(SET_ACTIVE(cellId));
   };
 
   useEffect(() => {
@@ -322,6 +339,10 @@ export default function Grid({
   useEffect(() => {
     const addKey = (e: KeyboardEvent) => {
       keyRef.current.add(e.key);
+      const first = selectedCellsRef.current[0];
+      if (first && !activeCellRef.current) {
+        handleKeyPress(e, first, false);
+      }
     };
 
     const removeKey = (e: KeyboardEvent) => {
@@ -354,6 +375,25 @@ export default function Grid({
       )
     : null;
 
+  const gridTemplateColumns = useMemo(() => {
+    const arr = Array.from({ length: MAX_COL }).map((_, index) => {
+      const width = widths[index];
+      if (typeof width !== 'number') {
+        return '115px';
+      }
+      return Math.max(width, 115) + 'px';
+    });
+    return '80px ' + arr.join(' ');
+  }, [MAX_COL]);
+
+  const gridTemplateRows = useMemo(() => {
+    const arr = Array.from({ length: MAX_ROW + 1 }).map((_, index) => {
+      const height = heights[index] ?? 36;
+      return Math.max(height, 36) + 'px';
+    });
+    return arr.join(' ');
+  }, [MAX_ROW]);
+
   return (
     <div className=''>
       <Toolbar />
@@ -361,21 +401,8 @@ export default function Grid({
       <div
         className='relative grid border border-gray-200'
         style={{
-          gridTemplateColumns: Array.from({ length: MAX_COL + 1 })
-            .map((_, index) => {
-              const width = widths[index];
-              if (typeof width !== 'number') {
-                return '115px';
-              }
-              return Math.max(width, 115) + 'px';
-            })
-            .join(' '),
-          gridTemplateRows: Array.from({ length: MAX_ROW + 1 })
-            .map((_, index) => {
-              const height = heights[index] ?? 36;
-              return Math.max(height, 36) + 'px';
-            })
-            .join(' '),
+          gridTemplateColumns: gridTemplateColumns,
+          gridTemplateRows: gridTemplateRows,
         }}
         onChange={handleChange}
         onDoubleClick={handleDoubleClick}
@@ -411,7 +438,7 @@ export default function Grid({
                   isAISelection={isAISelection}
                   id={cell.id}
                   isActive={
-                    selectedCells.length === 1 && selectedCells[0] === cellId
+                    activeCell === cellId && selectedCells.includes(cell.id)
                   }
                   type={cell.type}
                   isSelected={selectedCells.includes(cell.id)}

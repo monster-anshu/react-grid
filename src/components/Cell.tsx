@@ -86,7 +86,7 @@ const Cell: FC<CellProps> = ({
         <input
           type='text'
           className={twJoin(
-            'h-full w-full px-1 focus:outline-none',
+            'h-full w-full bg-transparent px-1 focus:outline-none',
             type === 'number' ? 'text-right' : 'text-left',
           )}
           value={value}

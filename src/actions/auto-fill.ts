@@ -25,7 +25,7 @@ export async function autoFill(content: (string | number)[][]) {
 
   const prompt = `You are a spreadsheet autofill assistant. Given the following data representing a column or row in a spreadsheet, complete the missing values by continuing the existing pattern. Return the completed data as a valid JSON array of strings or numbers.
 Data:
-${JSON.stringify(content, null, 2)}
+${JSON.stringify(content, null, 1)}
 `;
   const result = await model.generateContent(prompt);
   const text = result.response.text();

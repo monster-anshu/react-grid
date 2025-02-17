@@ -8,6 +8,7 @@ export interface Cell {
 // Grid state management
 export interface GridState {
   cells: Record<string, Cell>; // Map of cell id to cell data
+  activeCell: string | null;
   selectedCells: string[]; // Array of selected cell ids
   undoStack: Pick<GridState, 'cells' | 'selectedCells'>[]; // Stack of actions for undo
   redoStack: Pick<GridState, 'cells' | 'selectedCells'>[]; // Stack of actions for redo

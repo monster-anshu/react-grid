@@ -3,6 +3,7 @@ import { GridState } from '~/type';
 
 const initialState: GridState = {
   cells: {},
+  activeCell: null,
   redoStack: [],
   undoStack: [],
   selectedCells: [],
@@ -24,9 +25,9 @@ export const gridSlice = createSlice({
       const stateClone = cloneState(state);
       state.undoStack.push(stateClone);
 
-      // if (state.undoStack.length > 100) {
-      //   state.undoStack.length = 100;
-      // }
+      if (state.undoStack.length > 100) {
+        state.undoStack.length = 100;
+      }
 
       state.redoStack = [];
     },
@@ -91,6 +92,9 @@ export const gridSlice = createSlice({
         cell.type = typeof content === 'number' ? 'number' : 'text';
       });
     },
+    SET_ACTIVE: (state, action: PayloadAction<string | null>) => {
+      state.activeCell = action.payload;
+    },
     UNDO: (state) => {
       const popped = state.undoStack.pop();
       if (!popped) return;
@@ -113,4 +117,5 @@ export const {
   SAVE_STATE,
   UNDO,
   REDO,
+  SET_ACTIVE,
 } = gridSlice.actions;

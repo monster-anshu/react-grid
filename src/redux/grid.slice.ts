@@ -6,17 +6,29 @@ const initialState: GridState = {
   redoStack: [],
   undoStack: [],
   selectedCells: [],
-  activeCell: null,
 };
 
 export type UpdateContent = { cellId: string; content: string | number };
+
+const cloneState = ({ cells, selectedCells }: GridState) =>
+  JSON.parse(JSON.stringify({ cells, selectedCells })) as Pick<
+    GridState,
+    'cells' | 'selectedCells'
+  >;
 
 export const gridSlice = createSlice({
   name: 'grid',
   initialState,
   reducers: {
-    ACTIVATE_CELL: (state, action: PayloadAction<string | null>) => {
-      state.activeCell = action.payload;
+    SAVE_STATE: (state) => {
+      const stateClone = cloneState(state);
+      state.undoStack.push(stateClone);
+
+      // if (state.undoStack.length > 100) {
+      //   state.undoStack.length = 100;
+      // }
+
+      state.redoStack = [];
     },
     SELECT_CELL: (
       state,
@@ -25,6 +37,7 @@ export const gridSlice = createSlice({
         removeSelection: boolean;
       }>,
     ) => {
+      gridSlice.caseReducers.SAVE_STATE(state);
       if (Array.isArray(action.payload.cellId)) {
         state.selectedCells = action.payload.cellId;
         return;
@@ -41,6 +54,7 @@ export const gridSlice = createSlice({
       state,
       { payload }: PayloadAction<{ cellId: string | null }>,
     ) => {
+      gridSlice.caseReducers.SAVE_STATE(state);
       if (payload.cellId === null) {
         state.selectedCells = [];
         return;
@@ -53,6 +67,8 @@ export const gridSlice = createSlice({
       state,
       action: PayloadAction<UpdateContent | UpdateContent[]>,
     ) => {
+      gridSlice.caseReducers.SAVE_STATE(state);
+
       const payload = Array.isArray(action.payload)
         ? action.payload
         : [action.payload];
@@ -74,10 +90,26 @@ export const gridSlice = createSlice({
         cell.value = content;
       });
     },
+    UNDO: (state) => {
+      const popped = state.undoStack.pop();
+      if (!popped) return;
+      state.redoStack.push(cloneState(state));
+      Object.assign(state, popped);
+    },
+    REDO: (state) => {
+      const popped = state.redoStack.pop();
+      if (!popped) return;
+      state.undoStack.push(cloneState(state));
+      Object.assign(state, popped);
+    },
   },
 });
 
-export const { ACTIVATE_CELL, SET_CONTENT, SELECT_CELL, REMOVE_SELECTION } =
-  gridSlice.actions;
-
-export type Actions = ReturnType<typeof ACTIVATE_CELL | typeof SET_CONTENT>;
+export const {
+  SET_CONTENT,
+  SELECT_CELL,
+  REMOVE_SELECTION,
+  SAVE_STATE,
+  UNDO,
+  REDO,
+} = gridSlice.actions;

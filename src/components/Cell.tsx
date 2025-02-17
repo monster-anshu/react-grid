@@ -9,6 +9,7 @@ type CellProps = {
   isActive: boolean;
   onChange?: (value: string | number) => void;
   col: number;
+  row: number;
 
   onMouseEnter?: React.ComponentProps<'div'>['onMouseEnter'];
   onMouseDown?: React.ComponentProps<'div'>['onMouseDown'];
@@ -22,6 +23,7 @@ const Cell: FC<CellProps> = ({
   value,
   col,
   isSelected,
+  row,
   ...props
 }) => {
   const resizableRef = useRef<HTMLDivElement>(null);
@@ -39,7 +41,8 @@ const Cell: FC<CellProps> = ({
       <div
         className={[
           'absolute bottom-0 left-0 right-[2px] top-0 p-1 outline-green-700',
-          isSelected ? 'z-20 outline outline-2' : '',
+          isSelected ? 'outline outline-2' : '',
+          row === 1 && 'mt-[2px]',
         ].join(' ')}
         data-cell-id={id}
       >

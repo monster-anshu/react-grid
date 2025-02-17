@@ -1,10 +1,5 @@
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
-import {
-  ACTIVATE_CELL,
-  REMOVE_SELECTION,
-  SELECT_CELL,
-  SET_CONTENT,
-} from '~/redux/grid.slice';
+import { REMOVE_SELECTION, SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
 import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';
@@ -14,6 +9,7 @@ import { useGrid } from '~/hooks/grid';
 import { autoFill } from '~/actions/auto-fill';
 import { createPortal } from 'react-dom';
 import { CgSpinner } from 'react-icons/cg';
+import Toolbar from './Toolbar';
 
 interface GridProps {
   rows: number; // Number of rows
@@ -30,7 +26,6 @@ export default function Grid({
 }: GridProps) {
   const [isLoading, setIsLoading] = useState(false);
   const cells = useAppSelector((state) => state.grid.cells);
-  const activeCell = useAppSelector((state) => state.grid.activeCell);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
 
   const widths = useAppSelector((state) => state.layout.widths);
@@ -85,7 +80,7 @@ export default function Grid({
 
     switch (e.key) {
       case 'Enter':
-        dispatch(ACTIVATE_CELL(null));
+        dispatch(SELECT_CELL({ cellId: [], removeSelection: true }));
         break;
 
       case 'Tab':
@@ -126,7 +121,6 @@ export default function Grid({
       const cellId = getCellId(nextId);
       if (cellId)
         dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
-      dispatch(ACTIVATE_CELL(cellId));
     }
   };
 
@@ -203,7 +197,6 @@ export default function Grid({
   };
 
   const handleSingleSelect = (e: React.MouseEvent, cellId: string) => {
-    dispatch(ACTIVATE_CELL(null));
     if (keyRef.current.has('Control') && keyRef.current.has('Shift')) {
       const lastSelectedCellId = selectedCells.at(-1);
       if (!lastSelectedCellId) return;
@@ -222,6 +215,7 @@ export default function Grid({
     const target = e.target as HTMLInputElement;
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
+    e.stopPropagation();
     const value = target.value;
     dispatch(SET_CONTENT({ cellId: cellId, content: value }));
     onCellUpdate(cellId, value);
@@ -231,8 +225,7 @@ export default function Grid({
     const target = e.target as HTMLInputElement;
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
-    dispatch(ACTIVATE_CELL(null));
-    dispatch(REMOVE_SELECTION({ cellId }));
+    // dispatch(REMOVE_SELECTION({ cellId }));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -254,7 +247,6 @@ export default function Grid({
     const cellId = target.getAttribute?.('data-cell-id');
     if (!cellId) return;
     dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
-    dispatch(ACTIVATE_CELL(cellId));
   };
 
   useEffect(() => {
@@ -330,6 +322,7 @@ export default function Grid({
 
   return (
     <div className=''>
+      <Toolbar />
       {loader}
       <div
         className='relative grid border border-gray-200'
@@ -382,10 +375,13 @@ export default function Grid({
                 {col === 0 && <Row row={row}>{cols.index + 1}</Row>}
                 <Cell
                   id={cell.id}
-                  isActive={activeCell === cell.id}
+                  isActive={
+                    selectedCells.length === 1 && selectedCells[0] === cellId
+                  }
                   isSelected={selectedCells.includes(cell.id)}
                   value={cell.value}
                   col={col + 1}
+                  row={row + 1}
                   onMouseDown={(e) => handleMouseDown(e, cellId)}
                   onMouseEnter={() => handleMouseEnter(cellId)}
                   onMouseUp={() => handleMouseUp()}

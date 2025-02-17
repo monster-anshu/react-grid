@@ -9,9 +9,8 @@ export interface Cell {
 export interface GridState {
   cells: Record<string, Cell>; // Map of cell id to cell data
   selectedCells: string[]; // Array of selected cell ids
-  activeCell: string | null; // Currently active cell id
-  undoStack: GridAction[]; // Stack of actions for undo
-  redoStack: GridAction[]; // Stack of actions for redo
+  undoStack: Pick<GridState, 'cells' | 'selectedCells'>[]; // Stack of actions for undo
+  redoStack: Pick<GridState, 'cells' | 'selectedCells'>[]; // Stack of actions for redo
 }
 
 // Action for undo/redo

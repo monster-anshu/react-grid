@@ -1,5 +1,10 @@
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
-import { ACTIVATE_CELL, SELECT_CELL, SET_CONTENT } from '~/redux/grid.slice';
+import {
+  ACTIVATE_CELL,
+  REMOVE_SELECTION,
+  SELECT_CELL,
+  SET_CONTENT,
+} from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
 import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';
@@ -68,15 +73,7 @@ export default function Grid({
     }));
   });
 
-  const handleInputChange = (id: string, value: string | number) => {
-    dispatch(SET_CONTENT({ cellId: id, content: value }));
-    onCellUpdate(id, value);
-  };
-
-  const handleKeyPress = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    cellId: string,
-  ) => {
+  const handleKeyPress = (e: React.KeyboardEvent, cellId: string) => {
     const [row, col] = getRowCol(cellId);
 
     let nextId;
@@ -122,6 +119,8 @@ export default function Grid({
 
     if (nextId) {
       const cellId = getCellId(nextId);
+      cellId &&
+        dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
       dispatch(ACTIVATE_CELL(cellId));
     }
   };
@@ -143,6 +142,7 @@ export default function Grid({
       };
 
     setSort(curr);
+    onSort(curr.columnId + '', curr.direction as 'asc' | 'desc');
   };
 
   const handleMouseDown = (e: React.MouseEvent, cellId: string) => {
@@ -182,6 +182,7 @@ export default function Grid({
   };
 
   const handleSingleSelect = (e: React.MouseEvent, cellId: string) => {
+    dispatch(ACTIVATE_CELL(null));
     if (keyRef.current.has('Control') && keyRef.current.has('Shift')) {
       const lastSelectedCellId = selectedCells.at(-1);
       if (!lastSelectedCellId) return;
@@ -194,7 +195,46 @@ export default function Grid({
       return;
     }
     dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
-    return false;
+  };
+
+  const handleChange = (e: React.FormEvent) => {
+    const target = e.target as HTMLInputElement;
+    const cellId = target.getAttribute?.('data-cell-id');
+    if (!cellId) return;
+    const value = target.value;
+    dispatch(SET_CONTENT({ cellId: cellId, content: value }));
+    onCellUpdate(cellId, value);
+  };
+
+  const handleBlur = (e: React.FormEvent) => {
+    const target = e.target as HTMLInputElement;
+    const cellId = target.getAttribute?.('data-cell-id');
+    if (!cellId) return;
+    dispatch(ACTIVATE_CELL(null));
+    dispatch(REMOVE_SELECTION({ cellId }));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const target = e.target as HTMLInputElement;
+    const cellId = target.getAttribute?.('data-cell-id');
+    if (!cellId) return;
+    handleKeyPress(e, cellId);
+  };
+
+  const handleSingleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLDivElement;
+    const cellId = target.getAttribute?.('data-cell-id');
+    if (!cellId) return;
+    handleSingleSelect(e, cellId);
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLDivElement;
+    const cellId = target.getAttribute?.('data-cell-id');
+    console.log(cellId);
+    if (!cellId) return;
+    dispatch(SELECT_CELL({ cellId: cellId, removeSelection: true }));
+    dispatch(ACTIVATE_CELL(cellId));
   };
 
   useEffect(() => {
@@ -280,6 +320,11 @@ export default function Grid({
             })
             .join(' '),
         }}
+        onChange={handleChange}
+        onDoubleClick={handleDoubleClick}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        onClick={handleSingleClick}
       >
         {columns.map((col, colIndex) => (
           <Header
@@ -309,11 +354,8 @@ export default function Grid({
                   id={cell.id}
                   isActive={activeCell === cell.id}
                   isSelected={selectedCells.includes(cell.id)}
-                  onChange={(value) => handleInputChange(cell.id, value)}
                   value={cell.value}
-                  onKeyDown={(e) => handleKeyPress(e, cellId)}
                   col={col + 1}
-                  onClick={(e) => handleSingleSelect(e, cellId)}
                   onMouseDown={(e) => handleMouseDown(e, cellId)}
                   onMouseEnter={() => handleMouseEnter(cellId)}
                 />

@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef } from 'react';
-import { SET_CONTENT, UpdateContent } from '~/redux/grid.slice';
+import { SELECT_CELL, SET_CONTENT, UpdateContent } from '~/redux/grid.slice';
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
 
 type IClipboardProps = {
@@ -62,6 +62,7 @@ const Clipboard: FC<IClipboardProps> = ({ getRowCol, getCellId }) => {
     const [startRow, startCol] = getRowCol(lastSelected);
 
     const updatedCells: UpdateContent[] = [];
+    const cellIds: string[] = [];
 
     dataRows.forEach((row, rowIndex) => {
       row.forEach((value, colIndex) => {
@@ -69,12 +70,14 @@ const Clipboard: FC<IClipboardProps> = ({ getRowCol, getCellId }) => {
           `${startRow + rowIndex}_${startCol + colIndex}`,
         );
         if (targetCellId) {
+          cellIds.push(targetCellId);
           updatedCells.push({ cellId: targetCellId, content: value });
         }
       });
     });
 
     dispatch(SET_CONTENT(updatedCells));
+    dispatch(SELECT_CELL({ cellId: cellIds, removeSelection: true }));
   };
 
   useEffect(() => {

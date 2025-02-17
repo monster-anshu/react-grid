@@ -59,7 +59,7 @@ const Cell: FC<CellProps> = ({
         {isActive ? (
           <input
             type={typeof value === 'number' ? 'number' : 'text'}
-            className='h-full w-full px-1'
+            className='h-full w-full px-1 focus:outline-none'
             value={value}
             onChange={(e) =>
               onChange(

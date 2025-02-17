@@ -6,11 +6,14 @@ import {
   SET_CONTENT,
 } from '~/redux/grid.slice';
 import Cell from '~/components/Cell';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useActionState, useEffect, useRef, useState } from 'react';
 import Header from './Header';
 import Row from './Row';
 import Clipboard from './Clipboard';
 import { useGrid } from '~/hooks/grid';
+import { autoFill } from '~/actions/auto-fill';
+import { createPortal } from 'react-dom';
+import { CgSpinner } from 'react-icons/cg';
 
 interface GridProps {
   rows: number; // Number of rows
@@ -25,6 +28,7 @@ export default function Grid({
   onCellUpdate,
   onSort,
 }: GridProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const cells = useAppSelector((state) => state.grid.cells);
   const activeCell = useAppSelector((state) => state.grid.activeCell);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
@@ -167,18 +171,14 @@ export default function Grid({
       return;
     }
     const content = convertToArray();
-    const res = await fetch('/fill', {
-      method: 'POST',
-      body: JSON.stringify({
-        content: content,
-      }),
-    });
 
-    const json: {
-      content: string[][];
-    } = await res.json();
-
-    populateFromArray(json.content, firstSelected);
+    setIsLoading(true);
+    try {
+      const filledContent = await autoFill(content);
+      populateFromArray(filledContent, firstSelected);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSelectRange = (startCellIdRef: string, endCellId: string) => {
@@ -319,8 +319,18 @@ export default function Grid({
     };
   }, []);
 
+  const loader = isLoading
+    ? createPortal(
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60'>
+          <CgSpinner className='animate-spin text-white' size={30} />
+        </div>,
+        document.body,
+      )
+    : null;
+
   return (
     <div className=''>
+      {loader}
       <div
         className='relative grid border border-gray-200'
         style={{

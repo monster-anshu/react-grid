@@ -37,10 +37,10 @@ const Cell: FC<CellProps> = ({
       data-cell-id={id}
     >
       <div
-        className={twMerge(
+        className={[
           'absolute bottom-0 left-0 right-[2px] top-0 p-1 outline-green-700',
           isSelected ? 'z-20 outline outline-2' : '',
-        )}
+        ].join(' ')}
         data-cell-id={id}
       >
         {isActive ? (

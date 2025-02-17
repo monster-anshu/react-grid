@@ -10,6 +10,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Header from './Header';
 import Row from './Row';
 import Clipboard from './Clipboard';
+import { useGrid } from '~/hooks/grid';
 
 interface GridProps {
   rows: number; // Number of rows
@@ -27,11 +28,6 @@ export default function Grid({
   const cells = useAppSelector((state) => state.grid.cells);
   const activeCell = useAppSelector((state) => state.grid.activeCell);
   const selectedCells = useAppSelector((state) => state.grid.selectedCells);
-
-  const cellsRef = useRef(cells);
-  cellsRef.current = cells;
-  const selectedCellsRef = useRef(selectedCells);
-  selectedCellsRef.current = selectedCells;
 
   const widths = useAppSelector((state) => state.layout.widths);
   const heights = useAppSelector((state) => state.layout.heights);
@@ -56,6 +52,8 @@ export default function Grid({
   const getCellId = (rowCol: string) => {
     return cellIdRowColReverseRef.current[rowCol] || null;
   };
+
+  const { convertToArray } = useGrid({ getCellId, getRowCol });
 
   const dispatch = useAppDispatch();
   const [sort, setSort] = useState({
@@ -164,7 +162,7 @@ export default function Grid({
     if (!isDraggingRef.current || selectedCells.length < 2) {
       return;
     }
-    console.log(selectedCells);
+    console.log(convertToArray());
   };
 
   const handleSelectRange = (startCellIdRef: string, endCellId: string) => {

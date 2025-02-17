@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { useGrid, UseGridOptions } from '~/hooks/grid';
+import { useGrid } from '~/hooks/grid';
 
 type IClipboardProps = {
   getRowCol: (cellId: string) => readonly [number, number];

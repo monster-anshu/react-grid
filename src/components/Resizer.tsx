@@ -62,7 +62,7 @@ const Resizer: FC<IResizerProps> = ({ resizableRef, col, row, isSelected }) => {
 
   return (
     <div
-      className={`absolute top-0 right-0 h-full w-[2px] cursor-col-resize ${isSelected ? 'bg-green-700' : 'bg-gray-200'}`}
+      className={`absolute right-0 top-0 h-full w-[2px] cursor-col-resize ${isSelected ? 'bg-green-700' : 'bg-gray-200'}`}
       onMouseDown={handleMouseDown}
     ></div>
   );

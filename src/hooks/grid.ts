@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { SELECT_CELL, SET_CONTENT, UpdateContent } from '~/redux/grid.slice';
 import { useAppDispatch, useAppSelector } from '~/redux/hooks';
+import { NUMBER_ONLY } from '~/utils/regex';
 
 export type UseGridOptions = {
   getRowCol: (cellId: string) => readonly [number, number];
@@ -22,7 +23,10 @@ export const useGrid = ({ getCellId, getRowCol }: UseGridOptions) => {
   );
   activeCellRef.current = selectedCells.length === 1 ? selectedCells[0] : null;
 
-  const populateFromArray = (dataRows: string[][], cellId: string) => {
+  const populateFromArray = (
+    dataRows: (string | number)[][],
+    cellId: string,
+  ) => {
     const [startRow, startCol] = getRowCol(cellId);
 
     const updatedCells: UpdateContent[] = [];
@@ -35,7 +39,10 @@ export const useGrid = ({ getCellId, getRowCol }: UseGridOptions) => {
         );
         if (targetCellId) {
           cellIds.push(targetCellId);
-          updatedCells.push({ cellId: targetCellId, content: value });
+          updatedCells.push({
+            cellId: targetCellId,
+            content: NUMBER_ONLY.test(value + '') ? +value : value,
+          });
         }
       });
     });

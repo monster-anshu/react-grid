@@ -2,7 +2,7 @@
 
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
-export async function autoFill(content: string[][]) {
+export async function autoFill(content: (string | number)[][]) {
   const GEMINI_KEY = process.env.GEMINI_KEY as string;
   const schema = {
     type: SchemaType.ARRAY,
@@ -23,11 +23,11 @@ export async function autoFill(content: string[][]) {
     },
   });
 
-  const prompt = `You are a spreadsheet autofill assistant.  Given the following data representing a column in a spreadsheet, complete the missing values by continuing the existing pattern. Return the completed data as a valid JSON array of strings.
+  const prompt = `You are a spreadsheet autofill assistant. Given the following data representing a column or row in a spreadsheet, complete the missing values by continuing the existing pattern. Return the completed data as a valid JSON array of strings or numbers.
 Data:
 ${JSON.stringify(content, null, 2)}
 `;
   const result = await model.generateContent(prompt);
   const text = result.response.text();
-  return JSON.parse(text) as string[][];
+  return JSON.parse(text) as (string | number)[][];
 }

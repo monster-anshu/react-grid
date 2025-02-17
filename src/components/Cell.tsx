@@ -1,8 +1,10 @@
 import React, { FC, FormEvent, useEffect, useRef } from 'react';
 import Resizer from './Resizer';
-import { twMerge } from 'tailwind-merge';
+import { twJoin, twMerge } from 'tailwind-merge';
 import { PiMagicWandThin } from 'react-icons/pi';
 import { NUMBER_ONLY } from '~/utils/regex';
+import { MdNumbers } from 'react-icons/md';
+import { GoDot } from 'react-icons/go';
 
 type CellProps = {
   id: string;
@@ -82,8 +84,11 @@ const Cell: FC<CellProps> = ({
         data-cell-id={id}
       >
         <input
-          type={typeof value === 'number' ? 'number' : 'text'}
-          className='h-full w-full px-1 focus:outline-none'
+          type='text'
+          className={twJoin(
+            'h-full w-full px-1 focus:outline-none',
+            type === 'number' ? 'text-right' : 'text-left',
+          )}
           value={value}
           data-cell-id={id}
           onChange={handleChange}

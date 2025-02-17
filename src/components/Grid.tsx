@@ -365,9 +365,9 @@ export default function Grid({
             .map((_, index) => {
               const width = widths[index];
               if (typeof width !== 'number') {
-                return 'minmax(100px, 1fr)';
+                return '115px';
               }
-              return Math.max(width, 50) + 'px';
+              return Math.max(width, 115) + 'px';
             })
             .join(' '),
           gridTemplateRows: Array.from({ length: MAX_ROW + 1 })

@@ -1,14 +1,17 @@
-import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router';
+import React, { FC } from 'react';
+import Grid from '~/components/Grid';
 
-export const Route = createFileRoute("/")({
-  component: HomeComponent,
-});
+type IGridPageProps = {};
 
-function HomeComponent() {
+const GridPage: FC<IGridPageProps> = () => {
   return (
-    <main>
-      <h1>hello</h1>
-    </main>
+    <Grid columns={10} rows={10} onCellUpdate={() => {}} onSort={() => {}} />
   );
-}
+};
+
+export default GridPage;
+
+export const Route = createFileRoute('/')({
+  component: GridPage,
+});

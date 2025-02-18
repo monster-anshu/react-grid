@@ -10,6 +10,7 @@ This React application is a spreadsheet implementation without any external libr
 4. **Copy-Paste**
 5. **Sorting**
 6. **AI Auto-Complete**
+7. **Undo Redo**
 
 ## Tech Stack
 
@@ -47,3 +48,36 @@ Hold Ctr + Shift for range selection
 ### Sorting
 
 ![Sorting](static/sorting.gif)
+
+### AI Auto Fill
+
+Select the magic icon at the end of non empty cell and drag and select cell that should be used for the ai auto completion.
+
+If current selection is a AI selection the selection color will be blue otherwise green.
+
+![AI auto fill](static/ai-1.gif)
+![AI auto fill](static/ai-2.gif)
+
+## Run locally
+
+Clone repo
+
+```bash
+git clone https://github.com/monster-anshu/react-grid.git
+cd react-grid
+```
+
+Add a `.env` file containing gemini ai api key for auto completion.
+
+```bash
+GEMINI_KEY=key
+```
+
+Start application
+
+```bash
+pnpm i
+pnpm dev
+```
+
+Open http://localhost:3000
